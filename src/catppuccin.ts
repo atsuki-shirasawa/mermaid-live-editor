@@ -101,6 +101,8 @@ const buildTheme = (p: Palette, dark: boolean): Extension => {
         backgroundColor: p.mantle,
         color: p.overlay0,
         border: "none",
+        // 本文（base）との境に細い区切り線を引き、行番号列を「レール」として見せる。
+        borderRight: `1px solid ${p.surface0}`,
       },
       ".cm-activeLineGutter": {
         backgroundColor: dark ? "#28283c" : "#dce0e8",

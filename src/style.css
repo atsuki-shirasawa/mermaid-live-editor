@@ -29,10 +29,11 @@
   --accent-contrast: #11111b; /* crust */
   --error: #f38ba8; /* red */
   --error-bg: rgba(243, 139, 168, 0.12);
+  --editor-bg: #1e1e2e; /* base（本文。ガターの mantle と二段トーンにする） */
+  --scrollbar: #45475a; /* surface1 */
+  --scrollbar-hover: #6c7086; /* overlay0 */
   --shadow: 0 8px 28px rgba(0, 0, 0, 0.5);
   --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.45);
-  --diagram-bg: #1e1e2e; /* base */
-  --grid-dot: rgba(205, 214, 244, 0.07);
 }
 
 /* Catppuccin Latte */
@@ -50,14 +51,58 @@
   --accent-contrast: #ffffff;
   --error: #d20f39; /* red */
   --error-bg: rgba(210, 15, 57, 0.08);
+  --editor-bg: #eff1f5; /* base（本文。ガターの mantle と二段トーンにする） */
+  --scrollbar: #bcc0cc; /* surface1 */
+  --scrollbar-hover: #9ca0b0; /* overlay0 */
   --shadow: 0 10px 30px rgba(76, 79, 105, 0.15);
   --shadow-sm: 0 1px 2px rgba(76, 79, 105, 0.1);
-  --diagram-bg: #eff1f5; /* base */
+}
+
+/* プレビューのキャンバスは UI テーマではなく図のテーマに連動する。
+   色は Catppuccin の base（Mocha / Latte）に合わせる。 */
+[data-diagram="dark"] {
+  --diagram-bg: #1e1e2e; /* Mocha base */
+  --grid-dot: rgba(205, 214, 244, 0.07);
+  --diagram-inset: rgba(0, 0, 0, 0.5); /* 窪み（奥行き）用の内側シャドウ */
+}
+[data-diagram="light"] {
+  --diagram-bg: #eff1f5; /* Latte base */
   --grid-dot: rgba(76, 79, 105, 0.09);
+  --diagram-inset: rgba(76, 79, 105, 0.22); /* 窪み（奥行き）用の内側シャドウ */
 }
 
 * {
   box-sizing: border-box;
+}
+
+/* ---- スクロールバー（UI テーマ連動） ---- */
+/* Firefox / 標準プロパティ */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--scrollbar) transparent;
+}
+/* WebKit（Chrome / Safari / Edge） */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  /* 透明ボーダー＋背景クリップで、トラックに余白のある細いつまみに見せる */
+  background: var(--scrollbar);
+  border: 2px solid transparent;
+  background-clip: padding-box;
+  border-radius: 8px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--scrollbar-hover);
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
+::-webkit-scrollbar-corner {
+  background: transparent;
 }
 
 /* display を持つ要素でも hidden 属性を優先する */
@@ -115,15 +160,21 @@ body {
 }
 
 .brand-mark svg {
-  width: 20px;
-  height: 20px;
+  width: 22px;
+  height: 22px;
 }
 
 .topbar h1 {
-  font-size: 0.98rem;
-  font-weight: 650;
+  font-size: 1.12rem;
+  font-weight: 700;
   margin: 0;
-  letter-spacing: -0.01em;
+  letter-spacing: -0.02em;
+  /* ブランドマーク（accent）と呼応する accent グラデーションのワードマーク */
+  background: linear-gradient(135deg, var(--accent), var(--accent-hover));
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: var(--accent); /* background-clip 非対応時のフォールバック */
 }
 
 .actions {
@@ -372,11 +423,12 @@ body {
   border-color: var(--accent);
 }
 
-/* CodeMirror をペインいっぱいに広げる */
+/* CodeMirror をペインいっぱいに広げる。
+   本文は base 色（--editor-bg）、ガターは mantle（catppuccin.ts）で二段トーンにする。 */
 .cm-editor {
   height: 100%;
   font-size: 0.9rem;
-  background: var(--panel);
+  background: var(--editor-bg);
 }
 
 .cm-editor .cm-scroller {
@@ -415,6 +467,13 @@ body {
   min-height: 0;
   overflow: hidden;
   background: var(--diagram-bg);
+  /* キャンバスを一段奥に沈んだ「窪み」として見せて立体感を出す。
+     1px の内枠（UI テーマ連動の border で chrome と調和）＋
+     上辺を強めた内側シャドウ（diagram-inset はキャンバスの明暗に連動）。 */
+  box-shadow:
+    inset 0 0 0 1px var(--border),
+    inset 0 8px 18px -8px var(--diagram-inset),
+    inset 0 -4px 14px -10px var(--diagram-inset);
 }
 
 .preview-scroll {

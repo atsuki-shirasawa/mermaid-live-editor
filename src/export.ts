@@ -13,7 +13,12 @@ import {
   segPad,
   segScale,
 } from "./dom";
-import { resolveExportBackground, saveSettings, settings } from "./settings";
+import {
+  isDarkDiagramTheme,
+  resolveExportBackground,
+  saveSettings,
+  settings,
+} from "./settings";
 import type { Background } from "./types";
 import { toast } from "./utils";
 
@@ -140,8 +145,7 @@ const exportCopy = async () => {
   }
   // コピーは貼り付け先で見えるよう、透明設定でも背景を補う。
   const bg =
-    resolveExportBackground() ??
-    (settings.diagramTheme === "dark" ? DARK_BG : LIGHT_BG);
+    resolveExportBackground() ?? (isDarkDiagramTheme() ? DARK_BG : LIGHT_BG);
   const svg = buildExportSvg(bg);
   if (!svg) return;
   try {

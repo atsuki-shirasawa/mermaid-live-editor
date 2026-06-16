@@ -3,7 +3,7 @@ import { STORAGE_KEY } from "./constants";
 import { errorEl, previewEl } from "./dom";
 import { getCode } from "./editor";
 import { setExportEnabled } from "./export";
-import { settings } from "./settings";
+import { isDarkDiagramTheme, settings } from "./settings";
 import { refreshView } from "./view";
 
 const setError = (message: string | null) => {
@@ -17,6 +17,10 @@ const setError = (message: string | null) => {
 
 /** 現在の設定を Mermaid に反映する。 */
 export const applyMermaidConfig = () => {
+  // プレビューのキャンバス背景は UI テーマではなく図のテーマに連動させる。
+  document.documentElement.dataset.diagram = isDarkDiagramTheme()
+    ? "dark"
+    : "light";
   mermaid.initialize({
     startOnLoad: false,
     theme: settings.diagramTheme,

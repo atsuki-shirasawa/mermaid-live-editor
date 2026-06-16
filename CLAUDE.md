@@ -23,10 +23,10 @@ GitHub Pages へデプロイする。
 
 `src/` は責務ごとにモジュール分割されている。
 
-- `index.html` — マークアップ。`<head>` の no-flash スクリプトが描画前に UI テーマを確定する
+- `index.html` — マークアップ。`<head>` の no-flash スクリプトが描画前に UI テーマ（`data-theme`）と図テーマ由来のキャンバス背景（`data-diagram`）を確定する
 - `src/main.ts` — 各モジュールの初期化・配線のみ（UI テーマ・設定ドロワー・サンプル・キーボード）
 - `src/types.ts` / `src/constants.ts` — 型定義 / 定数（永続化キー・色・初期コード）
-- `src/settings.ts` — 設定の読み書き・旧キー移行・出力背景の解決
+- `src/settings.ts` — 設定の読み書き・旧キー移行・図テーマの暗/明判定（`isDarkDiagramTheme`）・出力背景の解決（プレビューと出力でこの判定を共有）
 - `src/dom.ts` — DOM 参照の集約（`$` ヘルパ）
 - `src/editor.ts` — CodeMirror 生成・`getCode`/`setCode`・テーマ再構成（`Compartment` を内包）
 - `src/mermaid-syntax.ts` — Mermaid 用の言語定義・リンター
@@ -45,6 +45,7 @@ GitHub Pages へデプロイする。
 - **アイコンは絵文字を使わない**。`lucide` パッケージのアイコンを `data-icon` 属性で注入する（`src/icons.ts` の `ICONS` レコード参照）。新規アイコンは lucide から import して `ICONS` に登録する（キーが `data-icon` の値）
 - **色は CSS 変数で管理**。`[data-theme="dark"]`（Catppuccin Mocha）/ `[data-theme="light"]`（Catppuccin Latte）に対応するトークンを `src/style.css` に定義し、コンポーネントは変数を参照する。16進カラーを直書きしない
 - **UI テーマと図のテーマは別物**。UI テーマ（dark/light）は `data-theme` 属性、図のテーマ（default/dark/forest/neutral）は Mermaid の設定。混同しない
+- **プレビューのキャンバス背景だけは `data-theme` ではなく `data-diagram` 連動**。`<html data-diagram="dark|light">` は図テーマの暗/明（`settings.ts` の `isDarkDiagramTheme`）で決まり、`render.ts` の `applyMermaidConfig` と no-flash スクリプトの2箇所で設定する。`--diagram-bg` / `--grid-dot` / `--diagram-inset` トークンは `[data-diagram]` 配下に定義（出力背景の `auto` と暗/明の判定を共有）
 - CodeMirror のテーマ切替は `Compartment` の `reconfigure` で行う（再生成しない）
 - Mermaid は `htmlLabels: false` で描画する（SVG 出力の互換性のため）
 - 文言・コメント・サンプル図の内容は日本語

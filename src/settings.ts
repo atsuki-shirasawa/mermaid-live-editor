@@ -48,6 +48,10 @@ export const settings = loadSettings();
 export const saveSettings = () =>
   localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings));
 
+/** 図のテーマが暗色系か（Mermaid は dark のみ暗色、他は明色）。 */
+export const isDarkDiagramTheme = (): boolean =>
+  settings.diagramTheme === "dark";
+
 /** 出力に使う背景色を決める（透明なら null）。 */
 export const resolveExportBackground = (): string | null => {
   switch (settings.exportBackground) {
@@ -59,6 +63,6 @@ export const resolveExportBackground = (): string | null => {
       return null;
     case "auto":
     default:
-      return settings.diagramTheme === "dark" ? DARK_BG : LIGHT_BG;
+      return isDarkDiagramTheme() ? DARK_BG : LIGHT_BG;
   }
 };

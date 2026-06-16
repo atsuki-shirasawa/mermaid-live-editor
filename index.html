@@ -6,7 +6,7 @@
     <link rel="icon" type="image/svg+xml" href="./favicon.svg" />
     <title>Mermaid Editor</title>
     <script>
-      // 描画前に UI テーマを確定してフラッシュを防ぐ
+      // 描画前に UI テーマと図テーマ（キャンバス背景）を確定してフラッシュを防ぐ
       (function () {
         try {
           var s = JSON.parse(
@@ -19,8 +19,13 @@
               ? "light"
               : "dark");
           document.documentElement.dataset.theme = t;
+          // 図テーマ既定は dark（DEFAULT_SETTINGS と一致）。dark のみ暗色キャンバス。
+          var d = s.diagramTheme || s.theme || "dark";
+          document.documentElement.dataset.diagram =
+            d === "dark" ? "dark" : "light";
         } catch (e) {
           document.documentElement.dataset.theme = "dark";
+          document.documentElement.dataset.diagram = "dark";
         }
       })();
     </script>
