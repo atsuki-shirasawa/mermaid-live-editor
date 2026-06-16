@@ -1,3 +1,5 @@
+import "@fontsource-variable/inter";
+import "@fontsource-variable/jetbrains-mono";
 import "./style.css";
 import { DEFAULT_CODE, STORAGE_KEY } from "./constants";
 import {

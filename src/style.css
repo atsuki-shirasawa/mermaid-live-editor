@@ -1,10 +1,13 @@
 :root {
   --radius: 9px;
   --radius-sm: 7px;
+  /* Latin は Web フォント、日本語は OS のフォントにフォールバックさせる */
   --font-sans:
-    ui-sans-serif, system-ui, -apple-system, "Segoe UI",
+    "Inter Variable", ui-sans-serif, system-ui, -apple-system, "Segoe UI",
     "Hiragino Kaku Gothic ProN", "Noto Sans JP", sans-serif;
-  --font-mono: ui-monospace, "SFMono-Regular", "Menlo", monospace;
+  --font-mono:
+    "JetBrains Mono Variable", ui-monospace, "SFMono-Regular", "Menlo",
+    monospace;
   font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
