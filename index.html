@@ -4,89 +4,152 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Mermaid Editor</title>
+    <script>
+      // 描画前に UI テーマを確定してフラッシュを防ぐ
+      (function () {
+        try {
+          var s = JSON.parse(
+            localStorage.getItem("mermaid-editor:settings") || "{}",
+          );
+          var t =
+            s.uiTheme ||
+            (window.matchMedia &&
+            window.matchMedia("(prefers-color-scheme: light)").matches
+              ? "light"
+              : "dark");
+          document.documentElement.dataset.theme = t;
+        } catch (e) {
+          document.documentElement.dataset.theme = "dark";
+        }
+      })();
+    </script>
   </head>
   <body>
     <header class="topbar">
       <div class="brand">
-        <span class="brand-mark">🧜</span>
+        <span class="brand-mark" data-icon="workflow"></span>
         <h1>Mermaid Editor</h1>
       </div>
       <div class="actions">
-        <button id="btn-copy" type="button" class="btn">
-          <span aria-hidden="true">📋</span> コピー
-        </button>
-        <button id="btn-svg" type="button" class="btn btn-ghost">
-          <span aria-hidden="true">⬇</span> SVG
-        </button>
-        <button id="btn-png" type="button" class="btn btn-ghost">
-          <span aria-hidden="true">⬇</span> PNG
-        </button>
+        <button
+          id="btn-theme"
+          type="button"
+          class="icon-btn"
+          aria-label="表示テーマを切り替える"
+        ></button>
         <button
           id="btn-settings"
           type="button"
           class="icon-btn"
+          data-icon="settings"
           aria-label="設定を開く"
-        >
-          ⚙
+        ></button>
+        <button id="btn-export" type="button" class="btn">
+          <span class="btn-icon" data-icon="image"></span>
+          出力
         </button>
       </div>
     </header>
 
     <main class="layout">
       <section class="editor-pane">
+        <div class="pane-toolbar">
+          <div class="pane-tabs">
+            <span class="pane-tab is-active">
+              <span class="pane-tab-icon" data-icon="code"></span>Code
+            </span>
+          </div>
+          <a
+            class="pane-link"
+            href="https://mermaid.js.org/intro/"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <span class="pane-tab-icon" data-icon="book"></span>Docs
+          </a>
+        </div>
         <div id="editor" aria-label="Mermaid コード"></div>
+        <div id="samples" class="samples">
+          <button
+            id="samples-toggle"
+            type="button"
+            class="samples-head"
+            aria-expanded="true"
+          >
+            <span class="label">
+              <span class="pane-tab-icon" data-icon="shapes"></span>サンプル図
+            </span>
+            <span class="chevron" data-icon="chevron-down"></span>
+          </button>
+          <div id="samples-body" class="samples-body"></div>
+        </div>
       </section>
+      <div
+        id="splitter"
+        class="splitter"
+        role="separator"
+        aria-label="ペイン幅を調整"
+      ></div>
       <section id="preview-pane" class="preview-pane">
+        <div class="pane-toolbar">
+          <div class="pane-tabs">
+            <span class="pane-tab is-active">
+              <span class="pane-tab-icon" data-icon="eye"></span>Diagram
+            </span>
+          </div>
+          <div class="zoom-controls">
+            <button
+              id="zoom-out"
+              type="button"
+              class="icon-btn"
+              data-icon="minus"
+              aria-label="縮小"
+            ></button>
+            <span id="zoom-level" class="zoom-level">100%</span>
+            <button
+              id="zoom-in"
+              type="button"
+              class="icon-btn"
+              data-icon="plus"
+              aria-label="拡大"
+            ></button>
+            <button
+              id="zoom-reset"
+              type="button"
+              class="icon-btn"
+              data-icon="maximize"
+              aria-label="画面に合わせる"
+            ></button>
+          </div>
+        </div>
         <div class="preview-scroll">
           <div id="preview" class="preview"></div>
-        </div>
-        <div class="zoom-controls">
-          <button id="zoom-out" type="button" class="icon-btn" aria-label="縮小">
-            −
-          </button>
-          <span id="zoom-level" class="zoom-level">100%</span>
-          <button id="zoom-in" type="button" class="icon-btn" aria-label="拡大">
-            ＋
-          </button>
-          <button
-            id="zoom-reset"
-            type="button"
-            class="icon-btn"
-            aria-label="画面に合わせる"
-          >
-            ⤢
-          </button>
         </div>
         <div id="error" class="error" role="alert" hidden></div>
       </section>
     </main>
 
+    <!-- 設定ドロワー -->
     <div id="backdrop" class="backdrop" hidden></div>
     <aside id="settings" class="drawer" hidden aria-label="設定">
       <div class="drawer-head">
         <h2>設定</h2>
-        <button id="settings-close" type="button" class="icon-btn" aria-label="閉じる">
-          ✕
-        </button>
+        <button
+          id="settings-close"
+          type="button"
+          class="icon-btn"
+          data-icon="x"
+          aria-label="閉じる"
+        ></button>
       </div>
 
       <div class="field">
-        <label for="set-theme">テーマ</label>
+        <label for="set-theme">図のテーマ</label>
         <select id="set-theme">
           <option value="default">Light</option>
           <option value="dark">Dark</option>
           <option value="forest">Forest</option>
           <option value="neutral">Neutral</option>
-        </select>
-      </div>
-
-      <div class="field">
-        <label for="set-background">背景色</label>
-        <select id="set-background">
-          <option value="auto">テーマに合わせる</option>
-          <option value="white">白</option>
-          <option value="dark">ダーク</option>
-          <option value="transparent">透明</option>
         </select>
       </div>
 
@@ -106,16 +169,92 @@
           <option value="natural">なめらか</option>
         </select>
       </div>
-
-      <div class="field">
-        <label for="set-scale">PNG 出力解像度</label>
-        <select id="set-scale">
-          <option value="1">1x</option>
-          <option value="2">2x</option>
-          <option value="3">3x</option>
-        </select>
-      </div>
     </aside>
+
+    <!-- 出力モーダル -->
+    <div id="export-backdrop" class="modal-backdrop" hidden></div>
+    <div
+      id="export-modal"
+      class="modal"
+      hidden
+      role="dialog"
+      aria-modal="true"
+      aria-label="画像を出力"
+    >
+      <div class="modal-head">
+        <h2>画像を出力</h2>
+        <button
+          id="export-close"
+          type="button"
+          class="icon-btn"
+          data-icon="x"
+          aria-label="閉じる"
+        ></button>
+      </div>
+
+      <div class="modal-body">
+        <div class="export-preview">
+          <div id="export-canvas" class="export-canvas"></div>
+        </div>
+
+        <div class="export-controls">
+          <div class="control-group">
+            <span class="control-label">背景</span>
+            <div class="seg" id="export-bg" role="group">
+              <button type="button" class="seg-item" data-value="auto">
+                テーマ
+              </button>
+              <button type="button" class="seg-item" data-value="white">
+                白
+              </button>
+              <button type="button" class="seg-item" data-value="dark">
+                ダーク
+              </button>
+              <button type="button" class="seg-item" data-value="transparent">
+                透明
+              </button>
+            </div>
+          </div>
+
+          <div class="control-group">
+            <span class="control-label">余白</span>
+            <div class="seg" id="export-pad" role="group">
+              <button type="button" class="seg-item" data-value="0">なし</button>
+              <button type="button" class="seg-item" data-value="16">小</button>
+              <button type="button" class="seg-item" data-value="32">中</button>
+              <button type="button" class="seg-item" data-value="64">大</button>
+            </div>
+          </div>
+
+          <div class="control-group">
+            <span class="control-label">PNG 解像度</span>
+            <div class="seg" id="export-scale" role="group">
+              <button type="button" class="seg-item" data-value="1">1x</button>
+              <button type="button" class="seg-item" data-value="2">2x</button>
+              <button type="button" class="seg-item" data-value="3">3x</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-foot">
+        <span class="foot-hint">形式を選んで出力</span>
+        <div class="format-actions">
+          <button id="export-copy" type="button" class="btn btn-ghost">
+            <span class="btn-icon" data-icon="copy"></span>
+            コピー
+          </button>
+          <button id="export-svg" type="button" class="btn btn-ghost">
+            <span class="btn-icon" data-icon="download"></span>
+            SVG
+          </button>
+          <button id="export-png" type="button" class="btn">
+            <span class="btn-icon" data-icon="download"></span>
+            PNG
+          </button>
+        </div>
+      </div>
+    </div>
 
     <script type="module" src="/src/main.ts"></script>
   </body>

@@ -1,34 +1,46 @@
 import mermaid from "mermaid";
 import { EditorView, basicSetup } from "codemirror";
 import { StreamLanguage } from "@codemirror/language";
+import { Compartment } from "@codemirror/state";
 import { linter, lintGutter, type Diagnostic } from "@codemirror/lint";
-import { oneDark } from "@codemirror/theme-one-dark";
+import { catppuccinMocha, catppuccinLatte } from "./catppuccin";
 import "./style.css";
 
+type UiTheme = "light" | "dark";
 type ThemeName = "default" | "dark" | "forest" | "neutral";
 type Curve = "basis" | "linear" | "step" | "natural";
 type Background = "auto" | "white" | "dark" | "transparent";
 
 interface Settings {
-  theme: ThemeName;
-  background: Background;
+  uiTheme: UiTheme;
+  diagramTheme: ThemeName;
   fontSize: number;
   curve: Curve;
+  exportBackground: Background;
+  exportPadding: number;
   pngScale: number;
 }
 
+const systemUiTheme = (): UiTheme =>
+  window.matchMedia?.("(prefers-color-scheme: light)").matches
+    ? "light"
+    : "dark";
+
 const DEFAULT_SETTINGS: Settings = {
-  theme: "dark",
-  background: "auto",
+  uiTheme: systemUiTheme(),
+  diagramTheme: "dark",
   fontSize: 16,
   curve: "basis",
+  exportBackground: "auto",
+  exportPadding: 16,
   pngScale: 2,
 };
 
 const STORAGE_KEY = "mermaid-editor:code";
 const SETTINGS_KEY = "mermaid-editor:settings";
+const SVG_NS = "http://www.w3.org/2000/svg";
 
-const DARK_BG = "#1e1e2e";
+const DARK_BG = "#11131a";
 const LIGHT_BG = "#ffffff";
 
 const DEFAULT_CODE = `graph TD
@@ -38,11 +50,151 @@ const DEFAULT_CODE = `graph TD
   D --> E[Mermaid.js が SVG 生成]
   E --> F[画像として出力]`;
 
+// ---- サンプル図 ----
+interface Sample {
+  label: string;
+  code: string;
+}
+
+const SAMPLES: Sample[] = [
+  {
+    label: "Flowchart",
+    code: `flowchart TD
+  A[開始] --> B{条件}
+  B -->|はい| C[処理 1]
+  B -->|いいえ| D[処理 2]
+  C --> E[終了]
+  D --> E`,
+  },
+  {
+    label: "Sequence",
+    code: `sequenceDiagram
+  participant U as ユーザー
+  participant S as サーバー
+  U->>S: リクエスト
+  S-->>U: レスポンス`,
+  },
+  {
+    label: "Class",
+    code: `classDiagram
+  class Animal {
+    +String name
+    +eat()
+  }
+  class Dog {
+    +bark()
+  }
+  Animal <|-- Dog`,
+  },
+  {
+    label: "State",
+    code: `stateDiagram-v2
+  [*] --> 待機
+  待機 --> 実行中: 開始
+  実行中 --> 完了: 終了
+  完了 --> [*]`,
+  },
+  {
+    label: "ER",
+    code: `erDiagram
+  CUSTOMER ||--o{ ORDER : places
+  ORDER ||--|{ LINE_ITEM : contains
+  CUSTOMER {
+    string name
+    string email
+  }`,
+  },
+  {
+    label: "Gantt",
+    code: `gantt
+  title プロジェクト計画
+  dateFormat YYYY-MM-DD
+  section 設計
+  要件定義 :a1, 2024-01-01, 7d
+  基本設計 :after a1, 5d`,
+  },
+  {
+    label: "Pie",
+    code: `pie title 利用ブラウザ
+  "Chrome" : 60
+  "Safari" : 25
+  "Firefox" : 15`,
+  },
+  {
+    label: "Mindmap",
+    code: `mindmap
+  root((Mermaid))
+    図の種類
+      フローチャート
+      シーケンス
+    出力
+      SVG
+      PNG`,
+  },
+  {
+    label: "Git",
+    code: `gitGraph
+  commit
+  branch develop
+  commit
+  checkout main
+  merge develop`,
+  },
+  {
+    label: "C4",
+    code: `C4Context
+  title システム構成図
+  Person(user, "ユーザー")
+  System(app, "Web アプリ")
+  Rel(user, app, "利用する")`,
+  },
+  {
+    label: "Timeline",
+    code: `timeline
+  title 沿革
+  2020 : 創業
+  2022 : サービス開始
+  2024 : 海外展開`,
+  },
+  {
+    label: "Journey",
+    code: `journey
+  title 買い物体験
+  section 来店
+    入店: 5: 客
+    商品選択: 3: 客
+  section 会計
+    支払い: 4: 客`,
+  },
+  {
+    label: "Quadrant",
+    code: `quadrantChart
+  title 優先度マトリクス
+  x-axis 低い --> 高い
+  y-axis 低い --> 高い
+  "施策 A": [0.3, 0.6]
+  "施策 B": [0.7, 0.8]`,
+  },
+];
+
 // ---- 設定の読み書き ----
 const loadSettings = (): Settings => {
   try {
     const raw = localStorage.getItem(SETTINGS_KEY);
-    if (raw) return { ...DEFAULT_SETTINGS, ...JSON.parse(raw) };
+    if (raw) {
+      const parsed = JSON.parse(raw) as Partial<Settings> & {
+        theme?: ThemeName;
+        background?: Background;
+      };
+      return {
+        ...DEFAULT_SETTINGS,
+        ...parsed,
+        // 旧キー（theme / background）からの移行
+        diagramTheme: parsed.diagramTheme ?? parsed.theme ?? DEFAULT_SETTINGS.diagramTheme,
+        exportBackground:
+          parsed.exportBackground ?? parsed.background ?? DEFAULT_SETTINGS.exportBackground,
+      };
+    }
   } catch {
     /* 壊れた値は無視してデフォルトに戻す */
   }
@@ -54,9 +206,9 @@ let settings = loadSettings();
 const saveSettings = () =>
   localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings));
 
-/** 現在のテーマ・設定から描画/出力に使う背景色を決める（透明なら null）。 */
-const resolveBackground = (): string | null => {
-  switch (settings.background) {
+/** 出力に使う背景色を決める（透明なら null）。 */
+const resolveExportBackground = (): string | null => {
+  switch (settings.exportBackground) {
     case "white":
       return LIGHT_BG;
     case "dark":
@@ -65,36 +217,89 @@ const resolveBackground = (): string | null => {
       return null;
     case "auto":
     default:
-      return settings.theme === "dark" ? DARK_BG : LIGHT_BG;
+      return settings.diagramTheme === "dark" ? DARK_BG : LIGHT_BG;
   }
+};
+
+// ---- アイコン（Lucide スタイルのインライン SVG） ----
+const ICONS: Record<string, string> = {
+  workflow:
+    '<rect width="8" height="8" x="3" y="3" rx="2"/><path d="M7 11v4a2 2 0 0 0 2 2h4"/><rect width="8" height="8" x="13" y="13" rx="2"/>',
+  settings:
+    '<path d="M20 7h-9"/><path d="M14 17H5"/><circle cx="17" cy="17" r="3"/><circle cx="7" cy="7" r="3"/>',
+  image:
+    '<rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/>',
+  copy:
+    '<rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/>',
+  download:
+    '<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/>',
+  sun: '<circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/>',
+  moon: '<path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/>',
+  plus: '<path d="M5 12h14"/><path d="M12 5v14"/>',
+  minus: '<path d="M5 12h14"/>',
+  maximize:
+    '<path d="M8 3H5a2 2 0 0 0-2 2v3"/><path d="M21 8V5a2 2 0 0 0-2-2h-3"/><path d="M3 16v3a2 2 0 0 0 2 2h3"/><path d="M16 21h3a2 2 0 0 0 2-2v-3"/>',
+  x: '<path d="M18 6 6 18"/><path d="m6 6 12 12"/>',
+  code: '<polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/>',
+  book:
+    '<path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H19a1 1 0 0 1 1 1v18a1 1 0 0 1-1 1H6.5a1 1 0 0 1 0-5H20"/>',
+  eye:
+    '<path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0Z"/><circle cx="12" cy="12" r="3"/>',
+  shapes:
+    '<path d="M8.3 10a.7.7 0 0 1-.626-1.079L11.4 3a.7.7 0 0 1 1.198-.043L16.3 8.9a.7.7 0 0 1-.572 1.1Z"/><rect x="3" y="14" width="7" height="7" rx="1"/><circle cx="17.5" cy="17.5" r="3.5"/>',
+  "chevron-down": '<path d="m6 9 6 6 6-6"/>',
+};
+
+const iconSvg = (name: string): string =>
+  `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${
+    ICONS[name] ?? ""
+  }</svg>`;
+
+const renderIcons = (root: ParentNode = document) => {
+  root.querySelectorAll<HTMLElement>("[data-icon]").forEach((el) => {
+    el.innerHTML = iconSvg(el.dataset.icon!);
+  });
 };
 
 // ---- DOM 参照 ----
 const editorParent = document.querySelector<HTMLDivElement>("#editor")!;
 const previewEl = document.querySelector<HTMLDivElement>("#preview")!;
-const previewPaneEl = document.querySelector<HTMLElement>("#preview-pane")!;
 const scrollEl = document.querySelector<HTMLElement>(".preview-scroll")!;
 const errorEl = document.querySelector<HTMLDivElement>("#error")!;
+const layoutEl = document.querySelector<HTMLElement>(".layout")!;
+const splitterEl = document.querySelector<HTMLElement>("#splitter")!;
+const samplesEl = document.querySelector<HTMLElement>("#samples")!;
+const samplesBody = document.querySelector<HTMLDivElement>("#samples-body")!;
+const samplesToggle = document.querySelector<HTMLButtonElement>("#samples-toggle")!;
 
 const zoomInBtn = document.querySelector<HTMLButtonElement>("#zoom-in")!;
 const zoomOutBtn = document.querySelector<HTMLButtonElement>("#zoom-out")!;
 const zoomResetBtn = document.querySelector<HTMLButtonElement>("#zoom-reset")!;
 const zoomLevelEl = document.querySelector<HTMLSpanElement>("#zoom-level")!;
-const btnCopy = document.querySelector<HTMLButtonElement>("#btn-copy")!;
-const btnSvg = document.querySelector<HTMLButtonElement>("#btn-svg")!;
-const btnPng = document.querySelector<HTMLButtonElement>("#btn-png")!;
 
+const btnTheme = document.querySelector<HTMLButtonElement>("#btn-theme")!;
+const btnExport = document.querySelector<HTMLButtonElement>("#btn-export")!;
 const btnSettings = document.querySelector<HTMLButtonElement>("#btn-settings")!;
+
 const settingsEl = document.querySelector<HTMLElement>("#settings")!;
 const backdropEl = document.querySelector<HTMLElement>("#backdrop")!;
 const settingsClose = document.querySelector<HTMLButtonElement>("#settings-close")!;
 
 const setTheme = document.querySelector<HTMLSelectElement>("#set-theme")!;
-const setBackground = document.querySelector<HTMLSelectElement>("#set-background")!;
 const setFontSize = document.querySelector<HTMLInputElement>("#set-fontsize")!;
 const fontSizeValue = document.querySelector<HTMLSpanElement>("#fontsize-value")!;
 const setCurve = document.querySelector<HTMLSelectElement>("#set-curve")!;
-const setScale = document.querySelector<HTMLSelectElement>("#set-scale")!;
+
+const exportModal = document.querySelector<HTMLElement>("#export-modal")!;
+const exportBackdrop = document.querySelector<HTMLElement>("#export-backdrop")!;
+const exportClose = document.querySelector<HTMLButtonElement>("#export-close")!;
+const exportCanvas = document.querySelector<HTMLDivElement>("#export-canvas")!;
+const segBg = document.querySelector<HTMLDivElement>("#export-bg")!;
+const segPad = document.querySelector<HTMLDivElement>("#export-pad")!;
+const segScale = document.querySelector<HTMLDivElement>("#export-scale")!;
+const btnExportCopy = document.querySelector<HTMLButtonElement>("#export-copy")!;
+const btnExportSvg = document.querySelector<HTMLButtonElement>("#export-svg")!;
+const btnExportPng = document.querySelector<HTMLButtonElement>("#export-png")!;
 
 // ---- ユーティリティ ----
 const debounce = <T extends (...args: never[]) => void>(fn: T, ms: number) => {
@@ -115,9 +320,7 @@ const setError = (message: string | null) => {
 };
 
 const setExportEnabled = (enabled: boolean) => {
-  btnCopy.disabled = !enabled;
-  btnSvg.disabled = !enabled;
-  btnPng.disabled = !enabled;
+  btnExport.disabled = !enabled;
 };
 
 let toastTimer: ReturnType<typeof setTimeout>;
@@ -134,11 +337,25 @@ const toast = (message: string) => {
   toastTimer = setTimeout(() => el!.classList.remove("show"), 1800);
 };
 
+// ---- UI テーマ ----
+const cmTheme = new Compartment();
+
+const applyUiTheme = () => {
+  document.documentElement.dataset.theme = settings.uiTheme;
+  const isDark = settings.uiTheme === "dark";
+  // ヘッダーのトグルは「切り替え後のテーマ」を示すアイコンにする。
+  btnTheme.innerHTML = iconSvg(isDark ? "sun" : "moon");
+  btnTheme.setAttribute(
+    "aria-label",
+    isDark ? "ライトモードに切り替える" : "ダークモードに切り替える",
+  );
+};
+
 // ---- Mermaid 設定の適用 ----
 const applyMermaidConfig = () => {
   mermaid.initialize({
     startOnLoad: false,
-    theme: settings.theme,
+    theme: settings.diagramTheme,
     securityLevel: "loose",
     // foreignObject を避けて canvas 変換できるようにする（PNG/コピー用）。
     htmlLabels: false,
@@ -197,17 +414,6 @@ const mermaidLinter = linter(
 
 // ---- 描画 ----
 let renderSeq = 0;
-
-const applyPreviewBackground = () => {
-  const bg = resolveBackground();
-  if (bg) {
-    previewPaneEl.style.background = bg;
-    previewPaneEl.classList.remove("checker");
-  } else {
-    previewPaneEl.style.removeProperty("background");
-    previewPaneEl.classList.add("checker");
-  }
-};
 
 const render = async () => {
   const raw = getCode();
@@ -305,7 +511,7 @@ zoomOutBtn.addEventListener("click", () => {
   userInteracted = true;
   setZoom(zoom / 1.2);
 });
-// ⤢: 画面に合わせて再フィット（自動追従も再開）。
+// 画面に合わせて再フィット（自動追従も再開）。
 zoomResetBtn.addEventListener("click", () => {
   userInteracted = false;
   fitToView();
@@ -359,31 +565,61 @@ window.addEventListener("resize", () => {
   if (!userInteracted) fitToView();
 });
 
+// ---- ペインのリサイズ（スプリッター） ----
+let resizing = false;
+splitterEl.addEventListener("pointerdown", (e) => {
+  resizing = true;
+  splitterEl.setPointerCapture(e.pointerId);
+  splitterEl.classList.add("dragging");
+});
+splitterEl.addEventListener("pointermove", (e) => {
+  if (!resizing) return;
+  const rect = layoutEl.getBoundingClientRect();
+  const w = Math.max(280, Math.min(rect.width - 360, e.clientX - rect.left));
+  layoutEl.style.setProperty("--editor-w", `${w}px`);
+  if (!userInteracted) fitToView();
+});
+const endResize = () => {
+  resizing = false;
+  splitterEl.classList.remove("dragging");
+};
+splitterEl.addEventListener("pointerup", endResize);
+splitterEl.addEventListener("pointercancel", endResize);
+
 // ---- 画像出力 ----
-/** プレビューの SVG を width/height 明示の複製として取得する。 */
-const getSvgElement = (): SVGSVGElement | null => {
+/** プレビューの SVG を、余白・背景を反映した出力用の複製として組み立てる。 */
+const buildExportSvg = (background: string | null): SVGSVGElement | null => {
   const original = previewEl.querySelector("svg");
   if (!original) return null;
   const svg = original.cloneNode(true) as SVGSVGElement;
   // 画面表示用に付与したズーム由来の inline サイズは出力に持ち込まない。
   svg.style.removeProperty("width");
   svg.style.removeProperty("height");
-  const width = original.viewBox.baseVal.width || original.getBoundingClientRect().width;
-  const height = original.viewBox.baseVal.height || original.getBoundingClientRect().height;
-  svg.setAttribute("width", String(width));
-  svg.setAttribute("height", String(height));
-  svg.setAttribute("xmlns", "http://www.w3.org/2000/svg");
-  return svg;
-};
+  svg.style.removeProperty("max-width");
 
-/** SVG の先頭に背景の rect を差し込む（SVG 保存用。bg が null なら何もしない）。 */
-const withBackgroundRect = (svg: SVGSVGElement, bg: string | null) => {
-  if (!bg) return svg;
-  const rect = document.createElementNS("http://www.w3.org/2000/svg", "rect");
-  rect.setAttribute("width", "100%");
-  rect.setAttribute("height", "100%");
-  rect.setAttribute("fill", bg);
-  svg.insertBefore(rect, svg.firstChild);
+  const vb = original.viewBox.baseVal;
+  const baseW = vb.width || original.getBoundingClientRect().width;
+  const baseH = vb.height || original.getBoundingClientRect().height;
+  const x = vb.width ? vb.x : 0;
+  const y = vb.height ? vb.y : 0;
+  const p = settings.exportPadding;
+
+  const outW = baseW + p * 2;
+  const outH = baseH + p * 2;
+  svg.setAttribute("viewBox", `${x - p} ${y - p} ${outW} ${outH}`);
+  svg.setAttribute("width", String(outW));
+  svg.setAttribute("height", String(outH));
+  svg.setAttribute("xmlns", SVG_NS);
+
+  if (background) {
+    const rect = document.createElementNS(SVG_NS, "rect");
+    rect.setAttribute("x", String(x - p));
+    rect.setAttribute("y", String(y - p));
+    rect.setAttribute("width", String(outW));
+    rect.setAttribute("height", String(outH));
+    rect.setAttribute("fill", background);
+    svg.insertBefore(rect, svg.firstChild);
+  }
   return svg;
 };
 
@@ -436,37 +672,41 @@ const downloadBlob = (blob: Blob, filename: string) => {
   URL.revokeObjectURL(url);
 };
 
-btnSvg.addEventListener("click", () => {
-  const svg = getSvgElement();
+const exportSvg = () => {
+  const svg = buildExportSvg(resolveExportBackground());
   if (!svg) return;
-  withBackgroundRect(svg, resolveBackground());
   const blob = new Blob([svgToString(svg)], {
     type: "image/svg+xml;charset=utf-8",
   });
   downloadBlob(blob, "diagram.svg");
-});
+  toast("SVG を保存しました");
+};
 
-btnPng.addEventListener("click", async () => {
-  const svg = getSvgElement();
+const exportPng = async () => {
+  const bg = resolveExportBackground();
+  const svg = buildExportSvg(bg);
   if (!svg) return;
   try {
-    const blob = await svgToPngBlob(svg, settings.pngScale, resolveBackground());
+    const blob = await svgToPngBlob(svg, settings.pngScale, bg);
     downloadBlob(blob, "diagram.png");
+    toast("PNG を保存しました");
   } catch (err) {
     console.error("PNG export failed:", err);
     toast(err instanceof Error ? err.message : "PNG 出力に失敗しました");
   }
-});
+};
 
-btnCopy.addEventListener("click", async () => {
-  const svg = getSvgElement();
-  if (!svg) return;
+const exportCopy = async () => {
   if (!navigator.clipboard?.write || typeof ClipboardItem === "undefined") {
     toast("このブラウザは画像コピーに未対応です（HTTPS が必要）");
     return;
   }
   // コピーは貼り付け先で見えるよう、透明設定でも背景を補う。
-  const bg = resolveBackground() ?? (settings.theme === "dark" ? DARK_BG : LIGHT_BG);
+  const bg =
+    resolveExportBackground() ??
+    (settings.diagramTheme === "dark" ? DARK_BG : LIGHT_BG);
+  const svg = buildExportSvg(bg);
+  if (!svg) return;
   try {
     await navigator.clipboard.write([
       new ClipboardItem({
@@ -480,6 +720,88 @@ btnCopy.addEventListener("click", async () => {
       err instanceof Error ? `コピー失敗: ${err.message}` : "コピーに失敗しました",
     );
   }
+};
+
+btnExportSvg.addEventListener("click", () => void exportSvg());
+btnExportPng.addEventListener("click", () => void exportPng());
+btnExportCopy.addEventListener("click", () => void exportCopy());
+
+// ---- 出力モーダル ----
+/** モーダル内のプレビューを現在のデザイン設定で更新する。 */
+const renderExportPreview = () => {
+  exportCanvas.innerHTML = "";
+  const original = previewEl.querySelector("svg");
+  if (!original) return;
+  const clone = original.cloneNode(true) as SVGSVGElement;
+  clone.removeAttribute("width");
+  clone.removeAttribute("height");
+  clone.style.removeProperty("width");
+  clone.style.removeProperty("height");
+  clone.style.maxWidth = "100%";
+  exportCanvas.appendChild(clone);
+
+  const bg = resolveExportBackground();
+  exportCanvas.style.padding = `${settings.exportPadding}px`;
+  if (bg) {
+    exportCanvas.style.background = bg;
+    exportCanvas.classList.remove("checker");
+  } else {
+    exportCanvas.style.removeProperty("background");
+    exportCanvas.classList.add("checker");
+  }
+};
+
+/** セグメンテッドコントロールの選択状態を value に合わせる。 */
+const syncSeg = (group: HTMLElement, value: string) => {
+  group.querySelectorAll<HTMLButtonElement>(".seg-item").forEach((b) => {
+    b.classList.toggle("is-active", b.dataset.value === value);
+  });
+};
+
+const syncExportUI = () => {
+  syncSeg(segBg, settings.exportBackground);
+  syncSeg(segPad, String(settings.exportPadding));
+  syncSeg(segScale, String(settings.pngScale));
+};
+
+const openExport = () => {
+  if (btnExport.disabled) return;
+  syncExportUI();
+  renderExportPreview();
+  exportModal.hidden = false;
+  exportBackdrop.hidden = false;
+};
+const closeExport = () => {
+  exportModal.hidden = true;
+  exportBackdrop.hidden = true;
+};
+
+btnExport.addEventListener("click", openExport);
+exportClose.addEventListener("click", closeExport);
+exportBackdrop.addEventListener("click", closeExport);
+
+segBg.addEventListener("click", (e) => {
+  const btn = (e.target as HTMLElement).closest<HTMLButtonElement>(".seg-item");
+  if (!btn) return;
+  settings.exportBackground = btn.dataset.value as Background;
+  saveSettings();
+  syncSeg(segBg, btn.dataset.value!);
+  renderExportPreview();
+});
+segPad.addEventListener("click", (e) => {
+  const btn = (e.target as HTMLElement).closest<HTMLButtonElement>(".seg-item");
+  if (!btn) return;
+  settings.exportPadding = Number(btn.dataset.value);
+  saveSettings();
+  syncSeg(segPad, btn.dataset.value!);
+  renderExportPreview();
+});
+segScale.addEventListener("click", (e) => {
+  const btn = (e.target as HTMLElement).closest<HTMLButtonElement>(".seg-item");
+  if (!btn) return;
+  settings.pngScale = Number(btn.dataset.value);
+  saveSettings();
+  syncSeg(segScale, btn.dataset.value!);
 });
 
 // ---- 設定ドロワー ----
@@ -495,51 +817,91 @@ const closeSettings = () => {
 btnSettings.addEventListener("click", openSettings);
 settingsClose.addEventListener("click", closeSettings);
 backdropEl.addEventListener("click", closeSettings);
+
+// UI テーマ切り替え
+btnTheme.addEventListener("click", () => {
+  settings.uiTheme = settings.uiTheme === "dark" ? "light" : "dark";
+  applyUiTheme();
+  editor.dispatch({
+    effects: cmTheme.reconfigure(
+      settings.uiTheme === "dark" ? catppuccinMocha : catppuccinLatte,
+    ),
+  });
+  saveSettings();
+});
+
+// キーボード: Esc で閉じる / Cmd|Ctrl+E で出力
 document.addEventListener("keydown", (e) => {
-  if (e.key === "Escape" && !settingsEl.hidden) closeSettings();
+  if (e.key === "Escape") {
+    if (!exportModal.hidden) closeExport();
+    else if (!settingsEl.hidden) closeSettings();
+  }
+  if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "e") {
+    e.preventDefault();
+    if (exportModal.hidden) openExport();
+  }
 });
 
 /** 設定値を UI コントロールに反映する。 */
 const syncSettingsUI = () => {
-  setTheme.value = settings.theme;
-  setBackground.value = settings.background;
+  setTheme.value = settings.diagramTheme;
   setFontSize.value = String(settings.fontSize);
   fontSizeValue.textContent = `${settings.fontSize}px`;
   setCurve.value = settings.curve;
-  setScale.value = String(settings.pngScale);
 };
 
-/** 設定変更後の共通処理：保存 → Mermaid 再設定 → 再描画 → 背景反映。 */
-const onSettingsChange = () => {
+/** 図に関わる設定変更後の共通処理：保存 → Mermaid 再設定 → 再描画。 */
+const onDiagramSettingsChange = () => {
   saveSettings();
   applyMermaidConfig();
-  applyPreviewBackground();
   void render();
 };
 
 setTheme.addEventListener("change", () => {
-  settings.theme = setTheme.value as ThemeName;
-  onSettingsChange();
-});
-setBackground.addEventListener("change", () => {
-  settings.background = setBackground.value as Background;
-  onSettingsChange();
+  settings.diagramTheme = setTheme.value as ThemeName;
+  onDiagramSettingsChange();
 });
 setFontSize.addEventListener("input", () => {
   settings.fontSize = Number(setFontSize.value);
   fontSizeValue.textContent = `${settings.fontSize}px`;
-  onSettingsChange();
+  onDiagramSettingsChange();
 });
 setCurve.addEventListener("change", () => {
   settings.curve = setCurve.value as Curve;
-  onSettingsChange();
+  onDiagramSettingsChange();
 });
-setScale.addEventListener("change", () => {
-  settings.pngScale = Number(setScale.value);
-  saveSettings(); // 解像度は再描画不要
+
+// ---- サンプル図 ----
+/** エディタの内容をサンプルコードで置き換える（Undo で元に戻せる）。 */
+const loadSample = (code: string) => {
+  editor.dispatch({
+    changes: { from: 0, to: editor.state.doc.length, insert: code },
+  });
+  editor.focus();
+  void render();
+};
+
+const buildSampleChips = () => {
+  for (const sample of SAMPLES) {
+    const chip = document.createElement("button");
+    chip.type = "button";
+    chip.className = "chip";
+    chip.textContent = sample.label;
+    chip.addEventListener("click", () => loadSample(sample.code));
+    samplesBody.appendChild(chip);
+  }
+};
+
+samplesToggle.addEventListener("click", () => {
+  const collapsed = samplesEl.classList.toggle("collapsed");
+  samplesToggle.setAttribute("aria-expanded", String(!collapsed));
 });
 
 // ---- 初期化 ----
+renderIcons();
+applyUiTheme();
+buildSampleChips();
+
 const initialCode = localStorage.getItem(STORAGE_KEY) ?? DEFAULT_CODE;
 const debouncedRender = debounce(() => void render(), 250);
 
@@ -549,7 +911,7 @@ editor = new EditorView({
   extensions: [
     basicSetup,
     mermaidMode,
-    oneDark,
+    cmTheme.of(settings.uiTheme === "dark" ? catppuccinMocha : catppuccinLatte),
     lintGutter(),
     mermaidLinter,
     EditorView.updateListener.of((u) => {
@@ -560,5 +922,4 @@ editor = new EditorView({
 
 syncSettingsUI();
 applyMermaidConfig();
-applyPreviewBackground();
 void render();
