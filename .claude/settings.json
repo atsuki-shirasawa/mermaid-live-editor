@@ -1,0 +1,15 @@
+{
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "for f in $CLAUDE_FILE_PATHS; do case \"$f\" in *.ts|*.js|*.json|*.css|*.html|*.md) npx prettier --write \"$f\" 2>/dev/null || true;; esac; done"
+          }
+        ]
+      }
+    ]
+  }
+}

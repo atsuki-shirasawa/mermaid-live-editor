@@ -1,7 +1,8 @@
 :root {
   --radius: 9px;
   --radius-sm: 7px;
-  --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI",
+  --font-sans:
+    ui-sans-serif, system-ui, -apple-system, "Segoe UI",
     "Hiragino Kaku Gothic ProN", "Noto Sans JP", sans-serif;
   --font-mono: ui-monospace, "SFMono-Regular", "Menlo", monospace;
   font-family: var(--font-sans);
@@ -142,8 +143,11 @@ body {
   border: 1px solid transparent;
   border-radius: var(--radius-sm);
   cursor: pointer;
-  transition: background 0.15s ease, transform 0.05s ease,
-    border-color 0.15s ease, opacity 0.15s ease;
+  transition:
+    background 0.15s ease,
+    transform 0.05s ease,
+    border-color 0.15s ease,
+    opacity 0.15s ease;
 }
 
 .btn:hover {
@@ -189,7 +193,10 @@ body {
   border: 1px solid var(--border);
   border-radius: var(--radius-sm);
   cursor: pointer;
-  transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+  transition:
+    background 0.15s ease,
+    border-color 0.15s ease,
+    color 0.15s ease;
 }
 
 .icon-btn:hover {
@@ -351,7 +358,10 @@ body {
   border: 1px solid var(--border);
   border-radius: 999px;
   cursor: pointer;
-  transition: background 0.12s ease, border-color 0.12s ease, color 0.12s ease;
+  transition:
+    background 0.12s ease,
+    border-color 0.12s ease,
+    color 0.12s ease;
 }
 
 .chip:hover {
@@ -655,12 +665,17 @@ body {
 /* 透明背景プレビュー時の市松模様 */
 .export-canvas.checker {
   background-color: #ececec;
-  background-image: linear-gradient(45deg, #c9c9c9 25%, transparent 25%),
+  background-image:
+    linear-gradient(45deg, #c9c9c9 25%, transparent 25%),
     linear-gradient(-45deg, #c9c9c9 25%, transparent 25%),
     linear-gradient(45deg, transparent 75%, #c9c9c9 75%),
     linear-gradient(-45deg, transparent 75%, #c9c9c9 75%);
   background-size: 18px 18px;
-  background-position: 0 0, 0 9px, 9px -9px, -9px 0;
+  background-position:
+    0 0,
+    0 9px,
+    9px -9px,
+    -9px 0;
 }
 
 .export-controls {
@@ -702,7 +717,9 @@ body {
   border: none;
   border-radius: 5px;
   cursor: pointer;
-  transition: background 0.12s ease, color 0.12s ease;
+  transition:
+    background 0.12s ease,
+    color 0.12s ease;
 }
 
 .seg-item:hover {
@@ -748,7 +765,9 @@ body {
   border-radius: var(--radius-sm);
   box-shadow: var(--shadow);
   opacity: 0;
-  transition: opacity 0.2s ease, transform 0.2s ease;
+  transition:
+    opacity 0.2s ease,
+    transform 0.2s ease;
   pointer-events: none;
   z-index: 20;
 }
