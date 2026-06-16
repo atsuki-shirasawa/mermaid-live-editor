@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Mermaid Editor</title>
+  </head>
+  <body>
+    <header class="topbar">
+      <div class="brand">
+        <span class="brand-mark">🧜</span>
+        <h1>Mermaid Editor</h1>
+      </div>
+      <div class="actions">
+        <button id="btn-copy" type="button" class="btn">
+          <span aria-hidden="true">📋</span> コピー
+        </button>
+        <button id="btn-svg" type="button" class="btn btn-ghost">
+          <span aria-hidden="true">⬇</span> SVG
+        </button>
+        <button id="btn-png" type="button" class="btn btn-ghost">
+          <span aria-hidden="true">⬇</span> PNG
+        </button>
+        <button
+          id="btn-settings"
+          type="button"
+          class="icon-btn"
+          aria-label="設定を開く"
+        >
+          ⚙
+        </button>
+      </div>
+    </header>
+
+    <main class="layout">
+      <section class="editor-pane">
+        <div id="editor" aria-label="Mermaid コード"></div>
+      </section>
+      <section id="preview-pane" class="preview-pane">
+        <div class="preview-scroll">
+          <div id="preview" class="preview"></div>
+        </div>
+        <div class="zoom-controls">
+          <button id="zoom-out" type="button" class="icon-btn" aria-label="縮小">
+            −
+          </button>
+          <span id="zoom-level" class="zoom-level">100%</span>
+          <button id="zoom-in" type="button" class="icon-btn" aria-label="拡大">
+            ＋
+          </button>
+          <button
+            id="zoom-reset"
+            type="button"
+            class="icon-btn"
+            aria-label="画面に合わせる"
+          >
+            ⤢
+          </button>
+        </div>
+        <div id="error" class="error" role="alert" hidden></div>
+      </section>
+    </main>
+
+    <div id="backdrop" class="backdrop" hidden></div>
+    <aside id="settings" class="drawer" hidden aria-label="設定">
+      <div class="drawer-head">
+        <h2>設定</h2>
+        <button id="settings-close" type="button" class="icon-btn" aria-label="閉じる">
+          ✕
+        </button>
+      </div>
+
+      <div class="field">
+        <label for="set-theme">テーマ</label>
+        <select id="set-theme">
+          <option value="default">Light</option>
+          <option value="dark">Dark</option>
+          <option value="forest">Forest</option>
+          <option value="neutral">Neutral</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <label for="set-background">背景色</label>
+        <select id="set-background">
+          <option value="auto">テーマに合わせる</option>
+          <option value="white">白</option>
+          <option value="dark">ダーク</option>
+          <option value="transparent">透明</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <label for="set-fontsize">
+          フォントサイズ <span id="fontsize-value" class="field-value"></span>
+        </label>
+        <input id="set-fontsize" type="range" min="10" max="28" step="1" />
+      </div>
+
+      <div class="field">
+        <label for="set-curve">フローチャートの線の形</label>
+        <select id="set-curve">
+          <option value="basis">曲線</option>
+          <option value="linear">直線</option>
+          <option value="step">段差</option>
+          <option value="natural">なめらか</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <label for="set-scale">PNG 出力解像度</label>
+        <select id="set-scale">
+          <option value="1">1x</option>
+          <option value="2">2x</option>
+          <option value="3">3x</option>
+        </select>
+      </div>
+    </aside>
+
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>
