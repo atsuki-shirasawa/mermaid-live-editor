@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8" />
+    <style>
+      @import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;800&family=JetBrains+Mono:wght@500&display=swap");
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      html, body { width: 1280px; height: 640px; }
+      .og {
+        width: 1280px;
+        height: 640px;
+        position: relative;
+        overflow: hidden;
+        background:
+          radial-gradient(900px 600px at 78% 28%, rgba(203, 166, 247, 0.16), transparent 60%),
+          radial-gradient(700px 500px at 12% 90%, rgba(180, 190, 254, 0.1), transparent 60%),
+          #11111b;
+        font-family: "Inter", system-ui, sans-serif;
+        color: #cdd6f4;
+        /* ドットグリッド（プレビュー背景と同系統） */
+        background-image:
+          radial-gradient(900px 600px at 78% 28%, rgba(203, 166, 247, 0.16), transparent 60%),
+          radial-gradient(700px 500px at 12% 90%, rgba(180, 190, 254, 0.1), transparent 60%),
+          radial-gradient(rgba(205, 214, 244, 0.05) 1.4px, transparent 1.4px);
+        background-size: 100% 100%, 100% 100%, 26px 26px;
+        background-color: #11111b;
+      }
+      .frame {
+        position: absolute;
+        inset: 28px;
+        border: 1px solid rgba(205, 214, 244, 0.08);
+        border-radius: 24px;
+      }
+      .content {
+        position: absolute;
+        inset: 0;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        padding: 0 96px;
+        gap: 30px;
+      }
+      .brand {
+        display: flex;
+        align-items: center;
+        gap: 28px;
+      }
+      .mark {
+        width: 132px;
+        height: 132px;
+        filter: drop-shadow(0 12px 32px rgba(203, 166, 247, 0.32));
+      }
+      .wordmark {
+        font-weight: 800;
+        font-size: 92px;
+        letter-spacing: -0.03em;
+        line-height: 1;
+        background: linear-gradient(135deg, #cba6f7, #b4befe);
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
+      }
+      .tagline {
+        font-size: 33px;
+        font-weight: 500;
+        color: #bac2de;
+        letter-spacing: 0.01em;
+      }
+      .meta {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        margin-top: 6px;
+      }
+      .chip {
+        font-family: "JetBrains Mono", monospace;
+        font-size: 20px;
+        font-weight: 500;
+        color: #b4befe;
+        border: 1px solid rgba(180, 190, 254, 0.3);
+        background: rgba(180, 190, 254, 0.06);
+        padding: 8px 16px;
+        border-radius: 999px;
+      }
+      .dot { color: #585b70; font-size: 20px; }
+    </style>
+  </head>
+  <body>
+    <div class="og">
+      <div class="frame"></div>
+      <div class="content">
+        <div class="brand">
+          <svg class="mark" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <rect x="2" y="2" width="20" height="20" rx="5.5" fill="#cba6f7" />
+            <path
+              d="M12 3.6C13.3 6.8 13.5 9.2 12.85 11.7 15 13.9 18 16.1 21.4 18.4 18 17.3 14.5 16.3 12 15.2 9.5 16.3 6 17.3 2.6 18.4 6 16.1 9 13.9 11.15 11.7 10.5 9.2 10.7 6.8 12 3.6Z"
+              fill="#1e1e2e"
+            />
+          </svg>
+          <span class="wordmark">Mermaid Editor</span>
+        </div>
+        <div class="tagline">
+          ブラウザで Mermaid 図を編集・プレビュー・画像出力
+        </div>
+        <div class="meta">
+          <span class="chip">mermaid.parse</span>
+          <span class="dot">·</span>
+          <span class="chip">SVG / PNG 出力</span>
+          <span class="dot">·</span>
+          <span class="chip">ダーク / ライト</span>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>

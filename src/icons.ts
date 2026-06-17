@@ -17,22 +17,19 @@ import {
   X,
 } from "lucide";
 
-// アプリのロゴ（自作）。フローチャートの異なる図形ノードを連結線で結び、
-// 頭文字 "M" を象る。谷のノードだけ Lavender（--accent-hover）でアクセント。
-// lucide と同じ IconNode 形式で記述し、共通の <svg> ラッパー・currentColor に乗せる。
+// アプリのロゴ（自作）。Mermaid（人魚）の二股の尾ひれをシルエット化したマーク。
+// くびれから左右に大きく開いたフルークと、中央の深いノッチで尾ひれらしさを出す。
+// ヘッダーでは currentColor（accent）の単色シルエット、favicon では紫バッジ＋白抜きと
+// なるが、パスは public/favicon.svg と同一形状で統一している。
 const LOGO: IconNode = [
-  // 連結線（M の骨格）— currentColor のストロークを継承
-  ["path", { d: "M4.5 19V5l7.5 7.5L19.5 5v14" }],
-  // 左上：角丸四角ノード
-  ["rect", { x: "2.7", y: "3.2", width: "3.6", height: "3.6", rx: "1.1", fill: "currentColor", stroke: "none" }],
-  // 右上：円ノード
-  ["circle", { cx: "19.5", cy: "5", r: "2.1", fill: "currentColor", stroke: "none" }],
-  // 谷：菱形ノード（アクセント色）
-  ["rect", { x: "9.9", y: "10.4", width: "4.2", height: "4.2", rx: "0.7", fill: "var(--accent-hover)", stroke: "none", transform: "rotate(45 12 12.5)" }],
-  // 左下：円ノード
-  ["circle", { cx: "4.5", cy: "19", r: "2.1", fill: "currentColor", stroke: "none" }],
-  // 右下：角丸四角ノード
-  ["rect", { x: "17.7", y: "17.2", width: "3.6", height: "3.6", rx: "1.1", fill: "currentColor", stroke: "none" }],
+  [
+    "path",
+    {
+      d: "M12 3.6C13.3 6.8 13.5 9.2 12.85 11.7 15 13.9 18 16.1 21.4 18.4 18 17.3 14.5 16.3 12 15.2 9.5 16.3 6 17.3 2.6 18.4 6 16.1 9 13.9 11.15 11.7 10.5 9.2 10.7 6.8 12 3.6Z",
+      fill: "currentColor",
+      stroke: "none",
+    },
+  ],
 ];
 
 // ---- アイコン（Lucide） ----
