@@ -1,3 +1,7 @@
+# CLAUDE.md
+
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+
 # Mermaid Live Editor
 
 Mermaid 図をブラウザ上で編集・プレビュー・画像出力できる静的 SPA。
@@ -9,6 +13,7 @@ GitHub Pages へデプロイする。
 - **エディタ**: CodeMirror 6（`@codemirror/*`）
 - **描画**: Mermaid 11（クライアントサイドで `mermaid.parse` / `mermaid.render`）
 - **シンタックスハイライト**: `@lezer/highlight` + 自作テーマ
+- **フォント**: `@fontsource-variable/*` で同梱。ディスプレイ（見出し・ワードマーク）= Bricolage Grotesque、本文 UI = Inter、コード・計器ラベル = JetBrains Mono の3層構成。`src/main.ts` で import する
 - デプロイ: `.github/workflows/deploy.yml`（GitHub Actions / Node.js 24）
 
 ## コマンド
@@ -33,17 +38,20 @@ GitHub Pages へデプロイする。
 - `src/render.ts` — Mermaid 設定適用・描画
 - `src/view.ts` — ズーム/パン/フィット・スプリッター
 - `src/export.ts` — 画像出力・出力モーダル
+- `src/focus-trap.ts` — モーダル/ドロワー表示中の Tab フォーカス閉じ込めと復帰（`activate`/`release`）
 - `src/icons.ts` — `lucide` パッケージのアイコン
 - `src/samples.ts` — サンプル図データ
 - `src/utils.ts` — `debounce` / `toast`
 - `src/style.css` — CSS 変数（デザイントークン）で全テーマを管理
 - `src/catppuccin.ts` — CodeMirror 用 Catppuccin テーマ（Mocha / Latte）。lint 表示色も含む自作テーマ
 - 設定の永続化キー: `mermaid-editor:settings`（localStorage）
+- `public/` — 配信アセット（favicon・アプリアイコン・OGP 画像）。`scripts/*.html` はそれらの画像をブラウザで書き出すための生成元（ビルドには含まれない）
 
 ## コーディング規約
 
 - **アイコンは絵文字を使わない**。`lucide` パッケージのアイコンを `data-icon` 属性で注入する（`src/icons.ts` の `ICONS` レコード参照）。新規アイコンは lucide から import して `ICONS` に登録する（キーが `data-icon` の値）
 - **色は CSS 変数で管理**。`[data-theme="dark"]`（Catppuccin Mocha）/ `[data-theme="light"]`（Catppuccin Latte）に対応するトークンを `src/style.css` に定義し、コンポーネントは変数を参照する。16進カラーを直書きしない
+- **フォントも CSS 変数で管理**。`--font-display`（見出し・ワードマーク）/ `--font-sans`（本文）/ `--font-mono`（コード・計器ラベル）を参照し、フォントファミリを直書きしない。新規フォントは `@fontsource-variable/*` を導入して `src/main.ts` で import する
 - **UI テーマと図のテーマは別物**。UI テーマ（dark/light）は `data-theme` 属性、図のテーマ（default/dark/forest/neutral）は Mermaid の設定。混同しない
 - **プレビューのキャンバス背景だけは `data-theme` ではなく `data-diagram` 連動**。`<html data-diagram="dark|light">` は図テーマの暗/明（`settings.ts` の `isDarkDiagramTheme`）で決まり、`render.ts` の `applyMermaidConfig` と no-flash スクリプトの2箇所で設定する。`--diagram-bg` / `--grid-dot` / `--diagram-inset` トークンは `[data-diagram]` 配下に定義（出力背景の `auto` と暗/明の判定を共有）
 - CodeMirror のテーマ切替は `Compartment` の `reconfigure` で行う（再生成しない）
