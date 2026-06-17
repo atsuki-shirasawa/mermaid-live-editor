@@ -11,6 +11,7 @@ const DEFAULT_SETTINGS: Settings = {
   diagramTheme: "dark",
   fontSize: 16,
   curve: "basis",
+  exportFormat: "png",
   exportBackground: "auto",
   exportPadding: 16,
   pngScale: 2,

@@ -11,8 +11,8 @@ import {
   Minus,
   Moon,
   Plus,
-  Settings,
   Shapes,
+  SlidersHorizontal,
   Sun,
   X,
 } from "lucide";
@@ -40,7 +40,7 @@ const LOGO: IconNode = [
 // 新規アイコンは lucide から import して ICONS に登録する（data-icon の値がキー）。
 const ICONS: Record<string, IconNode> = {
   logo: LOGO,
-  settings: Settings,
+  settings: SlidersHorizontal,
   image: Image,
   copy: Copy,
   download: Download,
