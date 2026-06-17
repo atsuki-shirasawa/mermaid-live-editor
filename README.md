@@ -1,6 +1,14 @@
+<div align="center">
+
+<img src="public/icon-512.png" alt="Mermaid Editor ロゴ" width="112" height="112" />
+
 # Mermaid Editor
 
 Mermaid のコードを入力するとリアルタイムで図を描画し、SVG / PNG での保存・クリップボードへのコピーができる静的 Web アプリです。GitHub Pages でそのまま公開できます（サーバー不要・すべてブラウザ内で完結）。
+
+<a href="https://atsuki-shirasawa.github.io/mermaid-live-editor/"><strong>▶ ライブデモ</strong></a>
+
+</div>
 
 ## 機能
 
