@@ -1,6 +1,12 @@
 import mermaid from "mermaid";
 import { STORAGE_KEY } from "./constants";
-import { errorEl, previewEl } from "./dom";
+import {
+  emptyStateEl,
+  errorEl,
+  previewEl,
+  previewPaneEl,
+  renderBarEl,
+} from "./dom";
 import { getCode } from "./editor";
 import { setExportEnabled } from "./export";
 import { isDarkDiagramTheme, settings } from "./settings";
@@ -39,16 +45,25 @@ let renderSeq = 0;
 export const render = async () => {
   const raw = getCode();
   const code = raw.trim();
-  localStorage.setItem(STORAGE_KEY, raw);
+  // 空コードはストレージに残さない（リロード時に初期サンプルへ戻す）。
+  if (code) localStorage.setItem(STORAGE_KEY, raw);
+  else localStorage.removeItem(STORAGE_KEY);
 
   if (!code) {
     previewEl.innerHTML = "";
+    emptyStateEl.hidden = false;
+    previewPaneEl.classList.remove("has-error");
     setExportEnabled(false);
     setError(null);
     return;
   }
+  emptyStateEl.hidden = true;
 
   const seq = ++renderSeq;
+  // 重い図のときだけローディングバーを出す（軽い描画ではちらつかせない）。
+  const barTimer = setTimeout(() => {
+    if (seq === renderSeq) renderBarEl.classList.add("active");
+  }, 180);
   try {
     await mermaid.parse(code);
     const { svg } = await mermaid.render(`mermaid-${seq}`, code);
@@ -57,8 +72,14 @@ export const render = async () => {
     refreshView();
     setExportEnabled(true);
     setError(null);
+    previewPaneEl.classList.remove("has-error");
   } catch (err) {
     if (seq !== renderSeq) return;
+    // 直近の有効な図は残したまま、エラー中であることを示す。
     setError(err instanceof Error ? err.message : String(err));
+    previewPaneEl.classList.add("has-error");
+  } finally {
+    clearTimeout(barTimer);
+    if (seq === renderSeq) renderBarEl.classList.remove("active");
   }
 };

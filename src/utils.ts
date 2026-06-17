@@ -20,6 +20,9 @@ export const toast = (message: string) => {
   if (!el) {
     el = document.createElement("div");
     el.className = "toast";
+    // 支援技術に読み上げさせる（視覚的な通知と同時に伝える）。
+    el.setAttribute("role", "status");
+    el.setAttribute("aria-live", "polite");
     document.body.appendChild(el);
   }
   el.textContent = message;

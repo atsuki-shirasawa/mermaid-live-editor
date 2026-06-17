@@ -1,13 +1,21 @@
 :root {
-  --radius: 9px;
+  --radius: 10px;
   --radius-sm: 7px;
+  --radius-lg: 16px;
+  --radius-pill: 999px;
   /* Latin は Web フォント、日本語は OS のフォントにフォールバックさせる */
+  --font-display:
+    "Bricolage Grotesque Variable", "Inter Variable", ui-sans-serif, system-ui,
+    "Hiragino Kaku Gothic ProN", "Noto Sans JP", sans-serif;
   --font-sans:
     "Inter Variable", ui-sans-serif, system-ui, -apple-system, "Segoe UI",
     "Hiragino Kaku Gothic ProN", "Noto Sans JP", sans-serif;
   --font-mono:
     "JetBrains Mono Variable", ui-monospace, "SFMono-Regular", "Menlo",
     monospace;
+  /* 計器パネル風のマイクロラベル（大文字・字間広め） */
+  --eyebrow: 600 0.68rem/1 var(--font-mono);
+  --eyebrow-tracking: 0.16em;
   font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
@@ -20,59 +28,90 @@
   --panel: #181825; /* mantle */
   --panel-2: #1e1e2e; /* base */
   --elevated: #313244; /* surface0 */
-  --border: #313244; /* surface0 */
+  --border: #2a2a3c; /* mantle と base の中間（控えめな罫線） */
   --border-strong: #45475a; /* surface1 */
+  --hairline: rgba(205, 214, 244, 0.06); /* 機械加工的な上辺ハイライト */
   --text: #cdd6f4; /* text */
   --muted: #7f849c; /* overlay1 */
+  --faint: #8a90a6; /* マイクロラベル用。コントラスト確保のため overlay0 より明るめ */
   --accent: #cba6f7; /* mauve */
   --accent-hover: #b4befe; /* lavender */
   --accent-contrast: #11111b; /* crust */
+  --accent-soft: rgba(203, 166, 247, 0.14);
+  --accent-line: rgba(203, 166, 247, 0.42);
+  --accent-glow: rgba(203, 166, 247, 0.28);
   --error: #f38ba8; /* red */
   --error-bg: rgba(243, 139, 168, 0.12);
   --editor-bg: #1e1e2e; /* base（本文。ガターの mantle と二段トーンにする） */
   --scrollbar: #45475a; /* surface1 */
   --scrollbar-hover: #6c7086; /* overlay0 */
-  --shadow: 0 8px 28px rgba(0, 0, 0, 0.5);
+  --glass: color-mix(in srgb, #181825 78%, transparent);
+  --glass-elevated: color-mix(in srgb, #1e1e2e 82%, transparent);
+  --scrim: rgba(6, 7, 12, 0.62);
+  --shadow:
+    0 1px 0 0 var(--hairline) inset, 0 18px 50px -12px rgba(0, 0, 0, 0.7),
+    0 4px 14px -6px rgba(0, 0, 0, 0.55);
   --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.45);
+  --shadow-pop: 0 1px 0 0 var(--hairline) inset, 0 2px 6px rgba(0, 0, 0, 0.4);
 }
 
 /* Catppuccin Latte */
 [data-theme="light"] {
-  --bg: #e6e9ef; /* mantle */
+  --bg: #dce0e8; /* crust */
   --panel: #eff1f5; /* base */
-  --panel-2: #dce0e8; /* crust */
+  --panel-2: #e6e9ef; /* mantle */
   --elevated: #ffffff;
   --border: #ccd0da; /* surface0 */
   --border-strong: #bcc0cc; /* surface1 */
+  --hairline: rgba(255, 255, 255, 0.7);
   --text: #4c4f69; /* text */
-  --muted: #8c8fa1; /* overlay1 */
+  --muted: #6c6f85; /* subtext0 */
+  --faint: #6e7184; /* マイクロラベル用。コントラスト確保のため overlay1 より暗め */
   --accent: #8839ef; /* mauve */
   --accent-hover: #7a2fd0;
   --accent-contrast: #ffffff;
+  --accent-soft: rgba(136, 57, 239, 0.1);
+  --accent-line: rgba(136, 57, 239, 0.4);
+  --accent-glow: rgba(136, 57, 239, 0.22);
   --error: #d20f39; /* red */
   --error-bg: rgba(210, 15, 57, 0.08);
   --editor-bg: #eff1f5; /* base（本文。ガターの mantle と二段トーンにする） */
   --scrollbar: #bcc0cc; /* surface1 */
   --scrollbar-hover: #9ca0b0; /* overlay0 */
-  --shadow: 0 10px 30px rgba(76, 79, 105, 0.15);
-  --shadow-sm: 0 1px 2px rgba(76, 79, 105, 0.1);
+  --glass: color-mix(in srgb, #eff1f5 80%, transparent);
+  --glass-elevated: color-mix(in srgb, #ffffff 84%, transparent);
+  --scrim: rgba(76, 79, 105, 0.32);
+  --shadow:
+    0 1px 0 0 var(--hairline) inset, 0 18px 44px -14px rgba(76, 79, 105, 0.3),
+    0 4px 12px -6px rgba(76, 79, 105, 0.18);
+  --shadow-sm: 0 1px 2px rgba(76, 79, 105, 0.12);
+  --shadow-pop:
+    0 1px 0 0 var(--hairline) inset, 0 2px 6px rgba(76, 79, 105, 0.16);
 }
 
 /* プレビューのキャンバスは UI テーマではなく図のテーマに連動する。
    色は Catppuccin の base（Mocha / Latte）に合わせる。 */
 [data-diagram="dark"] {
   --diagram-bg: #1e1e2e; /* Mocha base */
-  --grid-dot: rgba(205, 214, 244, 0.07);
+  --grid-dot: rgba(205, 214, 244, 0.08);
   --diagram-inset: rgba(0, 0, 0, 0.5); /* 窪み（奥行き）用の内側シャドウ */
 }
 [data-diagram="light"] {
   --diagram-bg: #eff1f5; /* Latte base */
-  --grid-dot: rgba(76, 79, 105, 0.09);
+  --grid-dot: rgba(76, 79, 105, 0.1);
   --diagram-inset: rgba(76, 79, 105, 0.22); /* 窪み（奥行き）用の内側シャドウ */
 }
 
 * {
   box-sizing: border-box;
+}
+
+/* 計器パネル風マイクロラベルの共通指定 */
+.eyebrow {
+  font: var(--eyebrow);
+  letter-spacing: var(--eyebrow-tracking);
+  text-transform: uppercase;
+  color: var(--faint);
 }
 
 /* ---- スクロールバー（UI テーマ連動） ---- */
@@ -142,39 +181,57 @@ body {
   align-items: center;
   justify-content: space-between;
   gap: 1rem;
-  padding: 0.6rem 1rem;
-  background: var(--panel);
+  padding: 0.55rem 1rem 0.55rem 0.9rem;
+  background:
+    linear-gradient(180deg, var(--hairline), transparent 60%), var(--panel);
   border-bottom: 1px solid var(--border);
 }
 
 .brand {
   display: flex;
   align-items: center;
-  gap: 0.55rem;
+  gap: 0.7rem;
   color: var(--text);
 }
 
+/* マークを「アプリアイコン」のチップに収め、ブランドの核にする */
 .brand-mark {
   display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
   color: var(--accent);
+  background: var(--accent-soft);
+  border: 1px solid var(--accent-line);
+  border-radius: var(--radius);
+  box-shadow:
+    0 1px 0 0 var(--hairline) inset,
+    0 0 0 0 var(--accent-glow);
 }
 
 .brand-mark svg {
-  width: 22px;
-  height: 22px;
+  width: 21px;
+  height: 21px;
 }
 
-.topbar h1 {
-  font-size: 1.12rem;
-  font-weight: 700;
+/* ワードマーク：display フォントで「Mermaid」を主、「Editor」を従に */
+.wordmark {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.34em;
   margin: 0;
+  font-family: var(--font-display);
+  font-size: 1.18rem;
+  font-weight: 700;
   letter-spacing: -0.02em;
-  /* ブランドマーク（accent）と呼応する accent グラデーションのワードマーク */
-  background: linear-gradient(135deg, var(--accent), var(--accent-hover));
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
-  color: var(--accent); /* background-clip 非対応時のフォールバック */
+  color: var(--text);
+}
+
+.wordmark span {
+  font-weight: 500;
+  color: var(--muted);
+  letter-spacing: 0;
 }
 
 .actions {
@@ -187,25 +244,28 @@ body {
 .btn {
   display: inline-flex;
   align-items: center;
-  gap: 0.4rem;
-  padding: 0.5rem 0.95rem;
-  font-size: 0.86rem;
-  font-weight: 550;
+  gap: 0.45rem;
+  padding: 0.52rem 1rem;
+  font-size: 0.85rem;
+  font-weight: 600;
   font-family: inherit;
+  letter-spacing: 0.01em;
   color: var(--accent-contrast);
   background: var(--accent);
   border: 1px solid transparent;
   border-radius: var(--radius-sm);
   cursor: pointer;
+  box-shadow: 0 6px 16px -8px var(--accent-glow);
   transition:
     background 0.15s ease,
-    transform 0.05s ease,
-    border-color 0.15s ease,
+    transform 0.06s ease,
+    box-shadow 0.15s ease,
     opacity 0.15s ease;
 }
 
 .btn:hover {
   background: var(--accent-hover);
+  box-shadow: 0 8px 22px -8px var(--accent-glow);
 }
 
 .btn:active {
@@ -214,26 +274,30 @@ body {
 
 .btn-icon {
   display: inline-flex;
-  opacity: 0.95;
 }
 
 .btn-ghost {
   color: var(--text);
-  background: transparent;
+  background: var(--panel-2);
   border-color: var(--border-strong);
+  box-shadow: var(--shadow-pop);
 }
 
 .btn-ghost:hover {
-  background: var(--panel-2);
+  filter: none;
+  color: var(--accent);
+  border-color: var(--accent-line);
+  background: var(--accent-soft);
 }
 
 .btn:disabled {
-  opacity: 0.45;
+  opacity: 0.4;
   cursor: not-allowed;
+  filter: grayscale(0.3);
 }
 
 .btn:disabled:hover {
-  background: var(--accent);
+  transform: none;
 }
 
 .icon-btn {
@@ -242,7 +306,7 @@ body {
   justify-content: center;
   width: 36px;
   height: 36px;
-  color: var(--text);
+  color: var(--muted);
   background: transparent;
   border: 1px solid var(--border);
   border-radius: var(--radius-sm);
@@ -250,18 +314,29 @@ body {
   transition:
     background 0.15s ease,
     border-color 0.15s ease,
-    color 0.15s ease;
+    color 0.15s ease,
+    transform 0.06s ease;
 }
 
 .icon-btn:hover {
+  color: var(--text);
   background: var(--panel-2);
   border-color: var(--border-strong);
+}
+
+.icon-btn:active {
+  transform: translateY(1px);
+}
+
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
 }
 
 /* ---- レイアウト ---- */
 .layout {
   display: grid;
-  grid-template-columns: var(--editor-w, 38%) 6px 1fr;
+  grid-template-columns: var(--editor-w, 38%) 7px 1fr;
   /* 行を definite サイズにしないとエディタがコード全体の高さまで伸びて内部スクロールしない */
   grid-template-rows: minmax(0, 1fr);
   flex: 1;
@@ -289,30 +364,46 @@ body {
   align-items: center;
   justify-content: space-between;
   gap: 0.5rem;
-  min-height: 42px;
-  padding: 0.3rem 0.5rem 0.3rem 0.6rem;
-  background: var(--panel);
+  min-height: 44px;
+  padding: 0 0.55rem 0 0.5rem;
+  background:
+    linear-gradient(180deg, var(--hairline), transparent 70%), var(--panel);
   border-bottom: 1px solid var(--border);
 }
 
 .pane-tabs {
   display: flex;
-  gap: 0.2rem;
+  gap: 0.1rem;
+  align-self: stretch;
 }
 
+/* タブは下線アクティブバー方式（エディトリアルな精密感） */
 .pane-tab {
   display: inline-flex;
   align-items: center;
-  gap: 0.4rem;
-  padding: 0.35rem 0.65rem;
-  font-size: 0.82rem;
-  font-weight: 600;
-  color: var(--text);
-  border-radius: 6px;
+  gap: 0.45rem;
+  padding: 0 0.7rem;
+  font: var(--eyebrow);
+  letter-spacing: var(--eyebrow-tracking);
+  text-transform: uppercase;
+  color: var(--muted);
+  position: relative;
 }
 
 .pane-tab.is-active {
-  background: var(--panel-2);
+  color: var(--text);
+}
+
+.pane-tab.is-active::after {
+  content: "";
+  position: absolute;
+  left: 0.7rem;
+  right: 0.7rem;
+  bottom: -1px;
+  height: 2px;
+  background: var(--accent);
+  border-radius: 2px 2px 0 0;
+  box-shadow: 0 0 8px -1px var(--accent-glow);
 }
 
 .pane-tab-icon {
@@ -328,13 +419,17 @@ body {
 .pane-link {
   display: inline-flex;
   align-items: center;
-  gap: 0.35rem;
-  padding: 0.35rem 0.6rem;
-  font-size: 0.8rem;
-  font-weight: 500;
-  color: var(--muted);
+  gap: 0.4rem;
+  padding: 0.32rem 0.6rem;
+  font: var(--eyebrow);
+  letter-spacing: var(--eyebrow-tracking);
+  text-transform: uppercase;
+  color: var(--faint);
   text-decoration: none;
   border-radius: 6px;
+  transition:
+    color 0.15s ease,
+    background 0.15s ease;
 }
 
 .pane-link:hover {
@@ -359,25 +454,34 @@ body {
   justify-content: space-between;
   width: 100%;
   padding: 0.6rem 0.85rem;
-  font-size: 0.82rem;
-  font-weight: 600;
-  font-family: inherit;
-  color: var(--text);
+  font: var(--eyebrow);
+  letter-spacing: var(--eyebrow-tracking);
+  text-transform: uppercase;
+  color: var(--muted);
   background: transparent;
   border: none;
   cursor: pointer;
+  transition: color 0.15s ease;
+}
+
+.samples-head:hover {
+  color: var(--text);
 }
 
 .samples-head .label {
   display: inline-flex;
   align-items: center;
-  gap: 0.45rem;
+  gap: 0.5rem;
+}
+
+.samples-head .label .pane-tab-icon {
+  color: var(--accent);
 }
 
 .samples-head .chevron {
   display: inline-flex;
-  color: var(--muted);
-  transition: transform 0.18s ease;
+  color: var(--faint);
+  transition: transform 0.2s ease;
 }
 
 .samples-head .chevron svg {
@@ -393,7 +497,7 @@ body {
   display: flex;
   flex-wrap: wrap;
   gap: 0.4rem;
-  padding: 0 0.85rem 0.85rem;
+  padding: 0 0.85rem 0.9rem;
   max-height: 168px;
   overflow: auto;
 }
@@ -403,24 +507,30 @@ body {
 }
 
 .chip {
-  padding: 0.35rem 0.7rem;
+  padding: 0.36rem 0.75rem;
   font-size: 0.78rem;
   font-family: inherit;
   font-weight: 500;
-  color: var(--text);
+  color: var(--muted);
   background: var(--panel-2);
   border: 1px solid var(--border);
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   cursor: pointer;
   transition:
-    background 0.12s ease,
-    border-color 0.12s ease,
-    color 0.12s ease;
+    background 0.14s ease,
+    border-color 0.14s ease,
+    color 0.14s ease,
+    transform 0.06s ease;
 }
 
 .chip:hover {
   color: var(--accent);
-  border-color: var(--accent);
+  background: var(--accent-soft);
+  border-color: var(--accent-line);
+}
+
+.chip:active {
+  transform: translateY(1px);
 }
 
 /* CodeMirror をペインいっぱいに広げる。
@@ -443,21 +553,43 @@ body {
 
 /* ペイン間のリサイズハンドル */
 .splitter {
+  position: relative;
   background: var(--border);
   cursor: col-resize;
-  position: relative;
   transition: background 0.15s ease;
+}
+
+/* つまみのグリップ表示（中央の縦ドット） */
+.splitter::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 2px;
+  height: 28px;
+  transform: translate(-50%, -50%);
+  border-radius: 2px;
+  background: var(--border-strong);
+  transition:
+    background 0.15s ease,
+    opacity 0.15s ease;
 }
 
 .splitter::after {
   content: "";
   position: absolute;
-  inset: 0 -3px;
+  inset: 0 -4px;
 }
 
 .splitter:hover,
 .splitter.dragging {
   background: var(--accent);
+}
+
+.splitter:hover::before,
+.splitter.dragging::before {
+  background: var(--accent-contrast);
+  opacity: 0.7;
 }
 
 .preview-pane {
@@ -477,6 +609,7 @@ body {
 }
 
 .preview-scroll {
+  position: relative;
   flex: 1;
   min-height: 0;
   overflow: hidden;
@@ -506,16 +639,30 @@ body {
   max-width: none;
 }
 
+/* ズームコントロールは浮遊する HUD ピルにまとめる */
 .zoom-controls {
   display: flex;
   align-items: center;
-  gap: 0.15rem;
+  gap: 0.1rem;
+  padding: 0.18rem;
+  background: var(--glass);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-pill);
+  box-shadow: var(--shadow-pop);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
 }
 
 .zoom-controls .icon-btn {
-  width: 30px;
-  height: 30px;
+  width: 28px;
+  height: 28px;
   border-color: transparent;
+  border-radius: var(--radius-pill);
+}
+
+.zoom-controls .icon-btn:hover {
+  background: var(--accent-soft);
+  color: var(--accent);
 }
 
 .zoom-controls .icon-btn [data-icon] svg {
@@ -524,17 +671,126 @@ body {
 }
 
 .zoom-level {
-  min-width: 3.4em;
+  min-width: 3.6em;
+  padding: 0.2rem 0.1rem;
   text-align: center;
-  font-size: 0.78rem;
+  font-family: var(--font-mono);
+  font-size: 0.74rem;
   font-variant-numeric: tabular-nums;
+  letter-spacing: 0.02em;
   color: var(--muted);
+  background: transparent;
+  border: none;
+  border-radius: var(--radius-pill);
+  cursor: pointer;
+  transition:
+    color 0.14s ease,
+    background 0.14s ease;
+}
+
+.zoom-level:hover {
+  color: var(--accent);
+  background: var(--accent-soft);
+}
+
+/* ---- プレビューの空状態 ---- */
+.empty-state {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 2rem;
+  text-align: center;
+  color: var(--muted);
+  pointer-events: none;
+}
+
+.empty-state .btn {
+  pointer-events: auto;
+  margin-top: 0.6rem;
+}
+
+.empty-icon {
+  display: inline-flex;
+  color: var(--faint);
+  opacity: 0.7;
+}
+
+.empty-icon svg {
+  width: 44px;
+  height: 44px;
+  stroke-width: 1.4;
+}
+
+.empty-title {
+  margin: 0.4rem 0 0;
+  font-family: var(--font-display);
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.empty-desc {
+  max-width: 30ch;
+  margin: 0;
+  font-size: 0.85rem;
+  line-height: 1.6;
+  color: var(--muted);
+}
+
+/* ---- 描画中のローディングバー（重い図のときだけ表示） ---- */
+.render-bar {
+  position: absolute;
+  top: 44px; /* ツールバーの直下 */
+  left: 0;
+  right: 0;
+  height: 2px;
+  overflow: hidden;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+  pointer-events: none;
+}
+
+.render-bar.active {
+  opacity: 1;
+}
+
+.render-bar::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  width: 40%;
+  background: var(--accent);
+  box-shadow: 0 0 10px -1px var(--accent-glow);
+  animation: render-slide 1s ease-in-out infinite;
+}
+
+@keyframes render-slide {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(350%);
+  }
+}
+
+/* エラー中は直近の図を薄くして「未反映」を示す */
+.preview-pane.has-error .preview {
+  opacity: 0.38;
+  filter: grayscale(0.4);
+  transition:
+    opacity 0.2s ease,
+    filter 0.2s ease;
 }
 
 .error {
   position: absolute;
   inset: auto 1rem 1rem 1rem;
   padding: 0.7rem 0.9rem;
+  padding-left: 1rem;
   font-family: var(--font-mono);
   font-size: 0.78rem;
   line-height: 1.5;
@@ -542,18 +798,23 @@ body {
   color: var(--error);
   background: var(--error-bg);
   border: 1px solid var(--error);
+  border-left-width: 3px;
   border-radius: var(--radius-sm);
-  backdrop-filter: blur(4px);
+  box-shadow: var(--shadow-sm);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
 }
 
-/* ---- 設定ドロワー ---- */
+/* ---- バックドロップ（ドロワー / モーダル共通） ---- */
 .backdrop,
 .modal-backdrop {
   position: fixed;
   inset: 0;
-  background: rgba(7, 10, 16, 0.5);
+  background: var(--scrim);
+  backdrop-filter: blur(3px);
+  -webkit-backdrop-filter: blur(3px);
   z-index: 10;
-  animation: fade-in 0.15s ease;
+  animation: fade-in 0.18s ease;
 }
 
 @keyframes fade-in {
@@ -565,19 +826,22 @@ body {
   }
 }
 
+/* ---- 設定ドロワー ---- */
 .drawer {
   position: fixed;
   top: 0;
   right: 0;
   z-index: 11;
-  width: min(340px, 86vw);
+  width: min(360px, 88vw);
   height: 100%;
-  padding: 1.1rem 1.3rem;
-  background: var(--panel);
+  padding: 1.3rem 1.4rem;
+  background: var(--glass);
   border-left: 1px solid var(--border);
   box-shadow: var(--shadow);
+  backdrop-filter: blur(20px) saturate(1.2);
+  -webkit-backdrop-filter: blur(20px) saturate(1.2);
   overflow-y: auto;
-  animation: slide-in 0.2s ease;
+  animation: slide-in 0.24s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 @keyframes slide-in {
@@ -593,35 +857,41 @@ body {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 1.3rem;
+  margin-bottom: 1.5rem;
 }
 
 .drawer-head h2 {
-  font-size: 0.95rem;
-  font-weight: 650;
+  font-family: var(--font-display);
+  font-size: 1.1rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
   margin: 0;
 }
 
 .field {
-  margin-bottom: 1.2rem;
+  margin-bottom: 1.3rem;
 }
 
 .field label {
   display: block;
-  margin-bottom: 0.45rem;
-  font-size: 0.8rem;
-  font-weight: 500;
-  color: var(--muted);
+  margin-bottom: 0.5rem;
+  font: var(--eyebrow);
+  letter-spacing: var(--eyebrow-tracking);
+  text-transform: uppercase;
+  color: var(--faint);
 }
 
 .field-value {
   color: var(--accent);
+  font-family: var(--font-mono);
   font-variant-numeric: tabular-nums;
+  text-transform: none;
+  letter-spacing: 0;
 }
 
 .field select {
   width: 100%;
-  padding: 0.55rem 0.65rem;
+  padding: 0.6rem 0.7rem;
   font-size: 0.88rem;
   font-family: inherit;
   color: var(--text);
@@ -629,11 +899,11 @@ body {
   border: 1px solid var(--border);
   border-radius: var(--radius-sm);
   cursor: pointer;
+  transition: border-color 0.15s ease;
 }
 
-.field select:focus-visible {
-  outline: 2px solid var(--accent);
-  outline-offset: 1px;
+.field select:hover {
+  border-color: var(--border-strong);
 }
 
 .field input[type="range"] {
@@ -648,23 +918,39 @@ body {
   top: 50%;
   left: 50%;
   z-index: 11;
-  width: min(860px, 94vw);
+  width: min(880px, 94vw);
   max-height: 92vh;
   transform: translate(-50%, -50%);
   display: flex;
   flex-direction: column;
-  background: var(--panel);
-  border: 1px solid var(--border);
-  border-radius: 14px;
+  background: var(--glass-elevated);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-lg);
   box-shadow: var(--shadow);
+  backdrop-filter: blur(24px) saturate(1.3);
+  -webkit-backdrop-filter: blur(24px) saturate(1.3);
   overflow: hidden;
-  animation: pop-in 0.16s ease;
+  animation: pop-in 0.2s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* モーダル上辺のアクセントヘアライン */
+.modal::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    var(--accent-line),
+    transparent
+  );
 }
 
 @keyframes pop-in {
   from {
     opacity: 0;
-    transform: translate(-50%, -48%) scale(0.98);
+    transform: translate(-50%, -47%) scale(0.97);
   }
   to {
     opacity: 1;
@@ -676,21 +962,23 @@ body {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0.9rem 1.1rem;
+  padding: 1rem 1.2rem;
   border-bottom: 1px solid var(--border);
 }
 
 .modal-head h2 {
-  font-size: 0.95rem;
-  font-weight: 650;
+  font-family: var(--font-display);
+  font-size: 1.1rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
   margin: 0;
 }
 
 .modal-body {
   display: grid;
   grid-template-columns: 1.4fr 1fr;
-  gap: 1.1rem;
-  padding: 1.1rem;
+  gap: 1.3rem;
+  padding: 1.3rem;
   min-height: 0;
   overflow: auto;
 }
@@ -699,11 +987,14 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  min-height: 260px;
-  padding: 0.75rem;
-  background: var(--panel-2);
+  min-height: 280px;
+  padding: 0.85rem;
+  background:
+    radial-gradient(var(--grid-dot) 1.2px, transparent 1.2px) 0 0 / 18px 18px,
+    var(--panel-2);
   border: 1px solid var(--border);
   border-radius: var(--radius);
+  box-shadow: inset 0 2px 10px -6px var(--diagram-inset, rgba(0, 0, 0, 0.4));
   overflow: hidden;
 }
 
@@ -714,6 +1005,7 @@ body {
   max-width: 100%;
   max-height: 56vh;
   border-radius: 4px;
+  box-shadow: var(--shadow-sm);
 }
 
 .export-canvas svg {
@@ -743,26 +1035,27 @@ body {
 .export-controls {
   display: flex;
   flex-direction: column;
-  gap: 1.1rem;
+  gap: 1.25rem;
 }
 
 .control-group {
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
+  gap: 0.55rem;
 }
 
 .control-label {
-  font-size: 0.8rem;
-  font-weight: 500;
-  color: var(--muted);
+  font: var(--eyebrow);
+  letter-spacing: var(--eyebrow-tracking);
+  text-transform: uppercase;
+  color: var(--faint);
 }
 
 /* セグメンテッドコントロール */
 .seg {
   display: flex;
-  gap: 0.3rem;
-  padding: 0.25rem;
+  gap: 0.25rem;
+  padding: 0.28rem;
   background: var(--panel-2);
   border: 1px solid var(--border);
   border-radius: var(--radius-sm);
@@ -770,18 +1063,19 @@ body {
 
 .seg-item {
   flex: 1;
-  padding: 0.4rem 0.3rem;
+  padding: 0.45rem 0.3rem;
   font-size: 0.82rem;
   font-family: inherit;
-  font-weight: 500;
+  font-weight: 600;
   color: var(--muted);
   background: transparent;
   border: none;
   border-radius: 5px;
   cursor: pointer;
   transition:
-    background 0.12s ease,
-    color 0.12s ease;
+    background 0.14s ease,
+    color 0.14s ease,
+    box-shadow 0.14s ease;
 }
 
 .seg-item:hover {
@@ -791,6 +1085,7 @@ body {
 .seg-item.is-active {
   color: var(--accent-contrast);
   background: var(--accent);
+  box-shadow: 0 2px 8px -4px var(--accent-glow);
 }
 
 .modal-foot {
@@ -798,13 +1093,15 @@ body {
   align-items: center;
   justify-content: space-between;
   gap: 1rem;
-  padding: 0.85rem 1.1rem;
+  padding: 0.9rem 1.2rem;
   border-top: 1px solid var(--border);
-  background: var(--panel);
+  background: linear-gradient(180deg, transparent, var(--hairline));
 }
 
 .foot-hint {
-  font-size: 0.8rem;
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  letter-spacing: 0.01em;
   color: var(--muted);
 }
 
@@ -813,25 +1110,95 @@ body {
   gap: 0.5rem;
 }
 
+/* ファイル名入力（末尾に拡張子を添える） */
+.filename-field {
+  display: flex;
+  align-items: center;
+  background: var(--panel-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  transition: border-color 0.15s ease;
+}
+
+.filename-field:focus-within {
+  border-color: var(--accent);
+}
+
+.filename-input {
+  flex: 1;
+  min-width: 0;
+  padding: 0.5rem 0.65rem;
+  font-size: 0.86rem;
+  font-family: var(--font-mono);
+  color: var(--text);
+  background: transparent;
+  border: none;
+  outline: none;
+}
+
+.filename-ext {
+  padding: 0 0.65rem 0 0.2rem;
+  font-family: var(--font-mono);
+  font-size: 0.86rem;
+  color: var(--faint);
+  user-select: none;
+}
+
+/* キーボードショートカットの表示チップ */
+.kbd {
+  display: inline-flex;
+  align-items: center;
+  margin-left: 0.15rem;
+  padding: 0.05rem 0.32rem;
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  font-weight: 600;
+  line-height: 1.4;
+  color: var(--accent-contrast);
+  background: rgba(255, 255, 255, 0.16);
+  border-radius: 5px;
+}
+
+.kbd:empty {
+  display: none;
+}
+
 /* ---- トースト ---- */
 .toast {
   position: fixed;
-  bottom: 1.4rem;
+  bottom: 1.5rem;
   left: 50%;
-  transform: translateX(-50%) translateY(8px);
-  padding: 0.6rem 1.05rem;
+  transform: translateX(-50%) translateY(10px);
+  padding: 0.62rem 1.1rem;
   font-size: 0.85rem;
-  font-weight: 500;
-  color: var(--accent-contrast);
-  background: var(--accent);
-  border-radius: var(--radius-sm);
+  font-weight: 600;
+  color: var(--text);
+  background: var(--glass-elevated);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-pill);
   box-shadow: var(--shadow);
+  backdrop-filter: blur(14px) saturate(1.3);
+  -webkit-backdrop-filter: blur(14px) saturate(1.3);
   opacity: 0;
   transition:
-    opacity 0.2s ease,
-    transform 0.2s ease;
+    opacity 0.22s ease,
+    transform 0.22s cubic-bezier(0.22, 1, 0.36, 1);
   pointer-events: none;
   z-index: 20;
+}
+
+/* トースト先頭のアクセントドット */
+.toast::before {
+  content: "";
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  margin-right: 0.55rem;
+  vertical-align: middle;
+  border-radius: 50%;
+  background: var(--accent);
+  box-shadow: 0 0 8px -1px var(--accent-glow);
 }
 
 .toast.show {
@@ -852,5 +1219,14 @@ body {
   }
   .modal-body {
     grid-template-columns: 1fr;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    transition-duration: 0.001ms !important;
   }
 }

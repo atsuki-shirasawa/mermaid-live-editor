@@ -65,7 +65,7 @@
     <header class="topbar">
       <div class="brand">
         <span class="brand-mark" data-icon="logo"></span>
-        <h1>Mermaid Editor</h1>
+        <h1 class="wordmark">Mermaid<span>Editor</span></h1>
       </div>
       <div class="actions">
         <button
@@ -80,10 +80,12 @@
           class="icon-btn"
           data-icon="settings"
           aria-label="設定を開く"
+          title="設定"
         ></button>
-        <button id="btn-export" type="button" class="btn">
+        <button id="btn-export" type="button" class="btn" title="画像を出力">
           <span class="btn-icon" data-icon="image"></span>
           出力
+          <kbd id="export-kbd" class="kbd"></kbd>
         </button>
       </div>
     </header>
@@ -141,14 +143,24 @@
               class="icon-btn"
               data-icon="minus"
               aria-label="縮小"
+              title="縮小"
             ></button>
-            <span id="zoom-level" class="zoom-level">100%</span>
+            <button
+              id="zoom-level"
+              type="button"
+              class="zoom-level"
+              aria-label="ズーム倍率（クリックで等倍）"
+              title="クリックで 100%"
+            >
+              100%
+            </button>
             <button
               id="zoom-in"
               type="button"
               class="icon-btn"
               data-icon="plus"
               aria-label="拡大"
+              title="拡大"
             ></button>
             <button
               id="zoom-reset"
@@ -156,12 +168,25 @@
               class="icon-btn"
               data-icon="maximize"
               aria-label="画面に合わせる"
+              title="画面に合わせる（ダブルクリックでも可）"
             ></button>
           </div>
         </div>
         <div class="preview-scroll">
           <div id="preview" class="preview"></div>
+          <div id="empty-state" class="empty-state" hidden>
+            <span class="empty-icon" data-icon="shapes"></span>
+            <p class="empty-title">プレビューはここに表示されます</p>
+            <p class="empty-desc">
+              左のコード欄に Mermaid を入力するか、サンプル図を選んでください。
+            </p>
+            <button id="empty-sample" type="button" class="btn btn-ghost">
+              <span class="btn-icon" data-icon="shuffle"></span>
+              ランダムにサンプルを表示
+            </button>
+          </div>
         </div>
+        <div class="render-bar" aria-hidden="true"></div>
         <div id="error" class="error" role="alert" hidden></div>
       </section>
     </main>
@@ -192,7 +217,8 @@
 
       <div class="field">
         <label for="set-fontsize">
-          フォントサイズ <span id="fontsize-value" class="field-value"></span>
+          図のフォントサイズ
+          <span id="fontsize-value" class="field-value"></span>
         </label>
         <input id="set-fontsize" type="range" min="10" max="28" step="1" />
       </div>
@@ -280,10 +306,33 @@
 
           <div class="control-group" id="export-scale-group">
             <span class="control-label">PNG 解像度</span>
-            <div class="seg" id="export-scale" role="group" aria-label="PNG 解像度">
+            <div
+              class="seg"
+              id="export-scale"
+              role="group"
+              aria-label="PNG 解像度"
+            >
               <button type="button" class="seg-item" data-value="1">1x</button>
               <button type="button" class="seg-item" data-value="2">2x</button>
               <button type="button" class="seg-item" data-value="3">3x</button>
+            </div>
+          </div>
+
+          <div class="control-group">
+            <label class="control-label" for="export-filename"
+              >ファイル名</label
+            >
+            <div class="filename-field">
+              <input
+                id="export-filename"
+                class="filename-input"
+                type="text"
+                value="diagram"
+                spellcheck="false"
+                autocomplete="off"
+                aria-label="ファイル名"
+              />
+              <span class="filename-ext" id="export-ext">.png</span>
             </div>
           </div>
         </div>
@@ -294,7 +343,7 @@
         <div class="format-actions">
           <button id="export-copy" type="button" class="btn btn-ghost">
             <span class="btn-icon" data-icon="copy"></span>
-            コピー
+            <span class="copy-label">コピー</span>
           </button>
           <button id="export-download" type="button" class="btn">
             <span class="btn-icon" data-icon="download"></span>

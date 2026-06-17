@@ -1,12 +1,17 @@
+import "@fontsource-variable/bricolage-grotesque";
 import "@fontsource-variable/inter";
 import "@fontsource-variable/jetbrains-mono";
 import "./style.css";
 import { DEFAULT_CODE, STORAGE_KEY } from "./constants";
 import {
   backdropEl,
+  btnExport,
   btnSettings,
   btnTheme,
   editorParent,
+  emptySampleBtn,
+  emptyStateEl,
+  exportKbd,
   samplesBody,
   samplesEl,
   samplesToggle,
@@ -17,7 +22,12 @@ import {
   settingsClose,
   settingsEl,
 } from "./dom";
-import { createEditor, reconfigureEditorTheme, setCode } from "./editor";
+import {
+  createEditor,
+  getCode,
+  reconfigureEditorTheme,
+  setCode,
+} from "./editor";
 import { closeExport, initExport, isExportOpen, openExport } from "./export";
 import { createFocusTrap } from "./focus-trap";
 import { iconSvg, renderIcons } from "./icons";
@@ -25,7 +35,7 @@ import { applyMermaidConfig, render } from "./render";
 import { SAMPLES } from "./samples";
 import { saveSettings, settings } from "./settings";
 import type { Curve, ThemeName } from "./types";
-import { debounce } from "./utils";
+import { debounce, toast } from "./utils";
 import { initView } from "./view";
 
 // ---- UI テーマ ----
@@ -102,6 +112,7 @@ const initSettings = () => {
 const loadSample = (code: string) => {
   setCode(code);
   void render();
+  toast("サンプルを読み込みました（⌘Z で元に戻せます）");
 };
 
 const initSamples = () => {
@@ -118,6 +129,27 @@ const initSamples = () => {
     const collapsed = samplesEl.classList.toggle("collapsed");
     samplesToggle.setAttribute("aria-expanded", String(!collapsed));
   });
+
+  // 空状態の「ランダムにサンプルを表示」：現在と違うサンプルを 1 つ選んで読み込む。
+  // プレビュー領域のパン操作を誘発しないよう pointerdown は止める。
+  emptyStateEl.addEventListener("pointerdown", (e) => e.stopPropagation());
+  emptySampleBtn.addEventListener("click", () => {
+    const current = getCode().trim();
+    const pool = SAMPLES.filter((s) => s.code.trim() !== current);
+    const list = pool.length ? pool : SAMPLES;
+    const sample = list[Math.floor(Math.random() * list.length)];
+    loadSample(sample.code);
+  });
+};
+
+// ---- ショートカット表示（OS で表記を出し分け） ----
+const initShortcutHint = () => {
+  const isMac = /mac|iphone|ipad/i.test(
+    navigator.platform || navigator.userAgent,
+  );
+  const combo = isMac ? "⌘E" : "Ctrl+E";
+  exportKbd.textContent = combo;
+  btnExport.title = `画像を出力 (${combo})`;
 };
 
 // ---- キーボード: Esc で閉じる / Cmd|Ctrl+E で出力 ----
@@ -142,8 +174,11 @@ initSettings();
 initView();
 initExport();
 initKeyboard();
+initShortcutHint();
 
-const initialCode = localStorage.getItem(STORAGE_KEY) ?? DEFAULT_CODE;
+// 空文字・空白のみの保存値は初期サンプルへフォールバックさせる。
+const stored = localStorage.getItem(STORAGE_KEY);
+const initialCode = stored && stored.trim() ? stored : DEFAULT_CODE;
 const debouncedRender = debounce(() => void render(), 250);
 
 createEditor({

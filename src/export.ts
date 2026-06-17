@@ -3,9 +3,12 @@ import {
   btnExport,
   btnExportCopy,
   btnExportDownload,
+  copyLabel,
   exportBackdrop,
   exportCanvas,
   exportClose,
+  exportExt,
+  exportFilename,
   exportHint,
   exportModal,
   previewEl,
@@ -107,6 +110,24 @@ const svgToPngBlob = async (
   });
 };
 
+/** 入力欄のファイル名（空ならデフォルト）。拡張子は形式から付与する。 */
+const fileBase = (): string => exportFilename.value.trim() || "diagram";
+
+/** 出力画像の実寸（余白込み・PNG は解像度倍率込み）を求める。 */
+const outputDimensions = (): { w: number; h: number } | null => {
+  const original = previewEl.querySelector("svg");
+  if (!original) return null;
+  const vb = original.viewBox.baseVal;
+  const baseW = vb.width || original.getBoundingClientRect().width;
+  const baseH = vb.height || original.getBoundingClientRect().height;
+  const p = settings.exportPadding;
+  const scale = settings.exportFormat === "png" ? settings.pngScale : 1;
+  return {
+    w: Math.round((baseW + p * 2) * scale),
+    h: Math.round((baseH + p * 2) * scale),
+  };
+};
+
 const downloadBlob = (blob: Blob, filename: string) => {
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
@@ -123,7 +144,7 @@ const exportSvg = () => {
   const blob = new Blob([svgToString(svg)], {
     type: "image/svg+xml;charset=utf-8",
   });
-  downloadBlob(blob, "diagram.svg");
+  downloadBlob(blob, `${fileBase()}.svg`);
   toast("SVG を保存しました");
 };
 
@@ -133,7 +154,7 @@ const exportPng = async () => {
   if (!svg) return;
   try {
     const blob = await svgToPngBlob(svg, settings.pngScale, bg);
-    downloadBlob(blob, "diagram.png");
+    downloadBlob(blob, `${fileBase()}.png`);
     toast("PNG を保存しました");
   } catch (err) {
     console.error("PNG export failed:", err);
@@ -233,14 +254,20 @@ const syncSeg = (group: HTMLElement, value: string) => {
   });
 };
 
-/** 形式に依存する表示（解像度の出し分け・フッターの説明）を更新する。 */
+/** 形式に依存する表示（解像度の出し分け・実寸・コピー挙動）を更新する。 */
 const syncFormatUI = () => {
   const isPng = settings.exportFormat === "png";
   // 解像度は PNG にだけ効くので、SVG のときは隠す。
   segScaleGroup.hidden = !isPng;
+  // 拡張子表示と、形式で変わるコピー挙動（PNG=画像 / SVG=コード）を明示する。
+  exportExt.textContent = isPng ? ".png" : ".svg";
+  copyLabel.textContent = isPng ? "画像をコピー" : "コードをコピー";
+
+  const dim = outputDimensions();
+  const size = dim ? ` · ${dim.w} × ${dim.h} px` : "";
   exportHint.textContent = isPng
-    ? `PNG · ${settings.pngScale}x で出力`
-    : "SVG · ベクター形式で出力";
+    ? `PNG · ${settings.pngScale}x${size}`
+    : `SVG · ベクター${size}`;
 };
 
 const syncExportUI = () => {
@@ -305,6 +332,7 @@ export const initExport = () => {
   bindSeg(segPad, (value) => {
     settings.exportPadding = Number(value);
     renderExportPreview();
+    syncFormatUI();
   });
   bindSeg(segScale, (value) => {
     settings.pngScale = Number(value);
