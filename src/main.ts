@@ -19,6 +19,7 @@ import {
 } from "./dom";
 import { createEditor, reconfigureEditorTheme, setCode } from "./editor";
 import { closeExport, initExport, isExportOpen, openExport } from "./export";
+import { createFocusTrap } from "./focus-trap";
 import { iconSvg, renderIcons } from "./icons";
 import { applyMermaidConfig, render } from "./render";
 import { SAMPLES } from "./samples";
@@ -47,13 +48,17 @@ const toggleUiTheme = () => {
 };
 
 // ---- 設定ドロワー ----
+// Tab をドロワー内に閉じ込め、閉じたら「設定」ボタンへフォーカスを戻す。
+const settingsTrap = createFocusTrap(settingsEl);
 const openSettings = () => {
   settingsEl.hidden = false;
   backdropEl.hidden = false;
+  settingsTrap.activate();
 };
 const closeSettings = () => {
   settingsEl.hidden = true;
   backdropEl.hidden = true;
+  settingsTrap.release();
 };
 
 /** 設定値を UI コントロールに反映する。 */

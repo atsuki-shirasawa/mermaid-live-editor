@@ -137,7 +137,7 @@
 
     <!-- 設定ドロワー -->
     <div id="backdrop" class="backdrop" hidden></div>
-    <aside id="settings" class="drawer" hidden aria-label="設定">
+    <aside id="settings" class="drawer" hidden tabindex="-1" aria-label="設定">
       <div class="drawer-head">
         <h2>設定</h2>
         <button
@@ -183,6 +183,7 @@
       id="export-modal"
       class="modal"
       hidden
+      tabindex="-1"
       role="dialog"
       aria-modal="true"
       aria-label="画像を出力"
@@ -205,8 +206,20 @@
 
         <div class="export-controls">
           <div class="control-group">
+            <span class="control-label">形式</span>
+            <div class="seg" id="export-format" role="group" aria-label="形式">
+              <button type="button" class="seg-item" data-value="svg">
+                SVG
+              </button>
+              <button type="button" class="seg-item" data-value="png">
+                PNG
+              </button>
+            </div>
+          </div>
+
+          <div class="control-group">
             <span class="control-label">背景</span>
-            <div class="seg" id="export-bg" role="group">
+            <div class="seg" id="export-bg" role="group" aria-label="背景">
               <button type="button" class="seg-item" data-value="auto">
                 テーマ
               </button>
@@ -224,7 +237,7 @@
 
           <div class="control-group">
             <span class="control-label">余白</span>
-            <div class="seg" id="export-pad" role="group">
+            <div class="seg" id="export-pad" role="group" aria-label="余白">
               <button type="button" class="seg-item" data-value="0">
                 なし
               </button>
@@ -234,9 +247,9 @@
             </div>
           </div>
 
-          <div class="control-group">
+          <div class="control-group" id="export-scale-group">
             <span class="control-label">PNG 解像度</span>
-            <div class="seg" id="export-scale" role="group">
+            <div class="seg" id="export-scale" role="group" aria-label="PNG 解像度">
               <button type="button" class="seg-item" data-value="1">1x</button>
               <button type="button" class="seg-item" data-value="2">2x</button>
               <button type="button" class="seg-item" data-value="3">3x</button>
@@ -246,19 +259,15 @@
       </div>
 
       <div class="modal-foot">
-        <span class="foot-hint">形式を選んで出力</span>
+        <span class="foot-hint" id="export-hint"></span>
         <div class="format-actions">
           <button id="export-copy" type="button" class="btn btn-ghost">
             <span class="btn-icon" data-icon="copy"></span>
             コピー
           </button>
-          <button id="export-svg" type="button" class="btn btn-ghost">
+          <button id="export-download" type="button" class="btn">
             <span class="btn-icon" data-icon="download"></span>
-            SVG
-          </button>
-          <button id="export-png" type="button" class="btn">
-            <span class="btn-icon" data-icon="download"></span>
-            PNG
+            ダウンロード
           </button>
         </div>
       </div>

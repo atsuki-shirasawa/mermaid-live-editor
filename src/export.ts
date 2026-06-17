@@ -2,24 +2,27 @@ import { DARK_BG, LIGHT_BG, SVG_NS } from "./constants";
 import {
   btnExport,
   btnExportCopy,
-  btnExportPng,
-  btnExportSvg,
+  btnExportDownload,
   exportBackdrop,
   exportCanvas,
   exportClose,
+  exportHint,
   exportModal,
   previewEl,
   segBg,
+  segFormat,
   segPad,
   segScale,
+  segScaleGroup,
 } from "./dom";
+import { createFocusTrap } from "./focus-trap";
 import {
   isDarkDiagramTheme,
   resolveExportBackground,
   saveSettings,
   settings,
 } from "./settings";
-import type { Background } from "./types";
+import type { Background, ExportFormat } from "./types";
 import { toast } from "./utils";
 
 export const setExportEnabled = (enabled: boolean) => {
@@ -138,7 +141,8 @@ const exportPng = async () => {
   }
 };
 
-const exportCopy = async () => {
+/** PNG 画像をクリップボードへコピーする。 */
+const copyPng = async () => {
   if (!navigator.clipboard?.write || typeof ClipboardItem === "undefined") {
     toast("このブラウザは画像コピーに未対応です（HTTPS が必要）");
     return;
@@ -155,7 +159,7 @@ const exportCopy = async () => {
         "image/png": svgToPngBlob(svg, settings.pngScale, bg),
       }),
     ]);
-    toast("画像をクリップボードにコピーしました");
+    toast("PNG をクリップボードにコピーしました");
   } catch (err) {
     console.error("Clipboard copy failed:", err);
     toast(
@@ -165,6 +169,34 @@ const exportCopy = async () => {
     );
   }
 };
+
+/** SVG ソースをテキストとしてクリップボードへコピーする。 */
+const copySvg = async () => {
+  if (!navigator.clipboard?.writeText) {
+    toast("このブラウザはコピーに未対応です（HTTPS が必要）");
+    return;
+  }
+  const svg = buildExportSvg(resolveExportBackground());
+  if (!svg) return;
+  try {
+    await navigator.clipboard.writeText(svgToString(svg));
+    toast("SVG コードをクリップボードにコピーしました");
+  } catch (err) {
+    console.error("Clipboard copy failed:", err);
+    toast(
+      err instanceof Error
+        ? `コピー失敗: ${err.message}`
+        : "コピーに失敗しました",
+    );
+  }
+};
+
+// ---- 形式に応じたアクションの振り分け ----
+const runDownload = () =>
+  settings.exportFormat === "svg" ? exportSvg() : void exportPng();
+
+const runCopy = () =>
+  settings.exportFormat === "svg" ? void copySvg() : void copyPng();
 
 // ---- 出力モーダル ----
 /** モーダル内のプレビューを現在のデザイン設定で更新する。 */
@@ -194,14 +226,29 @@ const renderExportPreview = () => {
 /** セグメンテッドコントロールの選択状態を value に合わせる。 */
 const syncSeg = (group: HTMLElement, value: string) => {
   group.querySelectorAll<HTMLButtonElement>(".seg-item").forEach((b) => {
-    b.classList.toggle("is-active", b.dataset.value === value);
+    const active = b.dataset.value === value;
+    b.classList.toggle("is-active", active);
+    // 見た目だけでなく支援技術にも選択状態を伝える。
+    b.setAttribute("aria-pressed", String(active));
   });
 };
 
+/** 形式に依存する表示（解像度の出し分け・フッターの説明）を更新する。 */
+const syncFormatUI = () => {
+  const isPng = settings.exportFormat === "png";
+  // 解像度は PNG にだけ効くので、SVG のときは隠す。
+  segScaleGroup.hidden = !isPng;
+  exportHint.textContent = isPng
+    ? `PNG · ${settings.pngScale}x で出力`
+    : "SVG · ベクター形式で出力";
+};
+
 const syncExportUI = () => {
+  syncSeg(segFormat, settings.exportFormat);
   syncSeg(segBg, settings.exportBackground);
   syncSeg(segPad, String(settings.exportPadding));
   syncSeg(segScale, String(settings.pngScale));
+  syncFormatUI();
 };
 
 /** セグメント選択時：値を保存しつつ選択状態を同期する共通ハンドラ。 */
@@ -218,31 +265,39 @@ const bindSeg = (group: HTMLElement, onPick: (value: string) => void) => {
   });
 };
 
+// Tab をモーダル内に閉じ込め、閉じたら「出力」ボタンへフォーカスを戻す。
+const trap = createFocusTrap(exportModal);
+
 export const openExport = () => {
   if (btnExport.disabled) return;
   syncExportUI();
   renderExportPreview();
   exportModal.hidden = false;
   exportBackdrop.hidden = false;
+  trap.activate();
 };
 
 export const closeExport = () => {
   exportModal.hidden = true;
   exportBackdrop.hidden = true;
+  trap.release();
 };
 
 export const isExportOpen = () => !exportModal.hidden;
 
 /** 出力に関するイベントを登録する。 */
 export const initExport = () => {
-  btnExportSvg.addEventListener("click", () => void exportSvg());
-  btnExportPng.addEventListener("click", () => void exportPng());
-  btnExportCopy.addEventListener("click", () => void exportCopy());
+  btnExportDownload.addEventListener("click", () => runDownload());
+  btnExportCopy.addEventListener("click", () => runCopy());
 
   btnExport.addEventListener("click", openExport);
   exportClose.addEventListener("click", closeExport);
   exportBackdrop.addEventListener("click", closeExport);
 
+  bindSeg(segFormat, (value) => {
+    settings.exportFormat = value as ExportFormat;
+    syncFormatUI();
+  });
   bindSeg(segBg, (value) => {
     settings.exportBackground = value as Background;
     renderExportPreview();
@@ -253,5 +308,6 @@ export const initExport = () => {
   });
   bindSeg(segScale, (value) => {
     settings.pngScale = Number(value);
+    syncFormatUI();
   });
 };

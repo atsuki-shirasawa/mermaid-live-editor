@@ -12,11 +12,15 @@ export type Curve = "basis" | "linear" | "step" | "natural";
 /** 画像出力時の背景。 */
 export type Background = "auto" | "white" | "dark" | "transparent";
 
+/** 画像出力の形式。 */
+export type ExportFormat = "svg" | "png";
+
 export interface Settings {
   uiTheme: UiTheme;
   diagramTheme: ThemeName;
   fontSize: number;
   curve: Curve;
+  exportFormat: ExportFormat;
   exportBackground: Background;
   exportPadding: number;
   pngScale: number;
