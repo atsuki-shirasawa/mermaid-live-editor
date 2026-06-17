@@ -34,6 +34,25 @@ const setZoom = (next: number) => {
   applyTransform();
 };
 
+/**
+ * 指定したクライアント座標を中心にズームする（その点を画面上で固定したまま拡縮）。
+ * transform は translate(pan) scale(zoom)・原点 center なので、
+ * コンテナ中心からのカーソルオフセット m に対し pan' = m(1-k) + k·pan で補正する。
+ */
+const zoomAt = (next: number, clientX: number, clientY: number) => {
+  const prev = zoom;
+  const z = clampZoom(next);
+  if (z === prev) return;
+  const rect = scrollEl.getBoundingClientRect();
+  const mx = clientX - (rect.left + rect.width / 2);
+  const my = clientY - (rect.top + rect.height / 2);
+  const k = z / prev;
+  panX = mx * (1 - k) + k * panX;
+  panY = my * (1 - k) + k * panY;
+  zoom = z;
+  applyTransform();
+};
+
 /** SVG の表示サイズを viewBox の自然サイズに固定する（Mermaid の max-width を解除）。 */
 const normalizeSvgSize = () => {
   const svg = previewEl.querySelector("svg");
@@ -88,17 +107,30 @@ export const initView = () => {
     userInteracted = false;
     fitToView();
   });
+  // 倍率表示クリックで等倍（100%）に戻す。
+  zoomLevelEl.addEventListener("click", () => {
+    userInteracted = true;
+    panX = 0;
+    panY = 0;
+    setZoom(1);
+  });
 
-  // マウスホイール / トラックパッドでズーム。
+  // マウスホイール / トラックパッドでカーソル位置を中心にズーム。
   scrollEl.addEventListener(
     "wheel",
     (e) => {
       e.preventDefault();
       userInteracted = true;
-      setZoom(zoom * (e.deltaY < 0 ? 1.1 : 1 / 1.1));
+      zoomAt(zoom * (e.deltaY < 0 ? 1.1 : 1 / 1.1), e.clientX, e.clientY);
     },
     { passive: false },
   );
+
+  // ダブルクリックで画面にフィット（自動追従も再開）。
+  scrollEl.addEventListener("dblclick", () => {
+    userInteracted = false;
+    fitToView();
+  });
 
   // 図を掴んで自由な位置にドラッグで移動する。
   let panning = false;

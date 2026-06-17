@@ -6,7 +6,11 @@ const $ = <T extends Element>(selector: string): T =>
 // エディタ / プレビュー
 export const editorParent = $<HTMLDivElement>("#editor");
 export const previewEl = $<HTMLDivElement>("#preview");
+export const previewPaneEl = $<HTMLElement>("#preview-pane");
 export const scrollEl = $<HTMLElement>(".preview-scroll");
+export const emptyStateEl = $<HTMLDivElement>("#empty-state");
+export const emptySampleBtn = $<HTMLButtonElement>("#empty-sample");
+export const renderBarEl = $<HTMLDivElement>(".render-bar");
 export const errorEl = $<HTMLDivElement>("#error");
 export const layoutEl = $<HTMLElement>(".layout");
 export const splitterEl = $<HTMLElement>("#splitter");
@@ -20,12 +24,13 @@ export const samplesToggle = $<HTMLButtonElement>("#samples-toggle");
 export const zoomInBtn = $<HTMLButtonElement>("#zoom-in");
 export const zoomOutBtn = $<HTMLButtonElement>("#zoom-out");
 export const zoomResetBtn = $<HTMLButtonElement>("#zoom-reset");
-export const zoomLevelEl = $<HTMLSpanElement>("#zoom-level");
+export const zoomLevelEl = $<HTMLButtonElement>("#zoom-level");
 
 // ヘッダー操作
 export const btnTheme = $<HTMLButtonElement>("#btn-theme");
 export const btnExport = $<HTMLButtonElement>("#btn-export");
 export const btnSettings = $<HTMLButtonElement>("#btn-settings");
+export const exportKbd = $<HTMLElement>("#export-kbd");
 
 // 設定ドロワー
 export const settingsEl = $<HTMLElement>("#settings");
@@ -47,5 +52,8 @@ export const segPad = $<HTMLDivElement>("#export-pad");
 export const segScale = $<HTMLDivElement>("#export-scale");
 export const segScaleGroup = $<HTMLDivElement>("#export-scale-group");
 export const exportHint = $<HTMLSpanElement>("#export-hint");
+export const exportFilename = $<HTMLInputElement>("#export-filename");
+export const exportExt = $<HTMLSpanElement>("#export-ext");
 export const btnExportCopy = $<HTMLButtonElement>("#export-copy");
+export const copyLabel = $<HTMLSpanElement>(".copy-label");
 export const btnExportDownload = $<HTMLButtonElement>("#export-download");

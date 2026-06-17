@@ -12,6 +12,7 @@ import {
   Moon,
   Plus,
   Shapes,
+  Shuffle,
   SlidersHorizontal,
   Sun,
   X,
@@ -51,6 +52,7 @@ const ICONS: Record<string, IconNode> = {
   book: Book,
   eye: Eye,
   shapes: Shapes,
+  shuffle: Shuffle,
   "chevron-down": ChevronDown,
 };
 
