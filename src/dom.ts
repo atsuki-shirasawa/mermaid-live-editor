@@ -40,6 +40,15 @@ export const setTheme = $<HTMLSelectElement>("#set-theme");
 export const setFontSize = $<HTMLInputElement>("#set-fontsize");
 export const fontSizeValue = $<HTMLSpanElement>("#fontsize-value");
 export const setCurve = $<HTMLSelectElement>("#set-curve");
+export const setLook = $<HTMLSelectElement>("#set-look");
+export const setNodeSpacing = $<HTMLInputElement>("#set-node-spacing");
+export const nodeSpacingValue = $<HTMLSpanElement>("#node-spacing-value");
+export const setRankSpacing = $<HTMLInputElement>("#set-rank-spacing");
+export const rankSpacingValue = $<HTMLSpanElement>("#rank-spacing-value");
+export const setDiagramPadding = $<HTMLInputElement>("#set-diagram-padding");
+export const diagramPaddingValue = $<HTMLSpanElement>("#diagram-padding-value");
+export const setFont = $<HTMLSelectElement>("#set-font");
+export const setReset = $<HTMLButtonElement>("#set-reset");
 
 // 出力モーダル
 export const exportModal = $<HTMLElement>("#export-modal");

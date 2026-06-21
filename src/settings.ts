@@ -11,6 +11,12 @@ const DEFAULT_SETTINGS: Settings = {
   diagramTheme: "dark",
   fontSize: 16,
   curve: "basis",
+  look: "classic",
+  // 以下は Mermaid のフローチャート既定値（変更しなければ従来どおりの見た目）。
+  nodeSpacing: 50,
+  rankSpacing: 50,
+  diagramPadding: 8,
+  fontFamily: "default",
   exportFormat: "png",
   exportBackground: "auto",
   exportPadding: 16,
@@ -48,6 +54,21 @@ export const settings = loadSettings();
 
 export const saveSettings = () =>
   localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings));
+
+/**
+ * 図に関わる設定（設定ドロワーの項目）を既定値に戻す。
+ * UI テーマと画像出力の設定はドロワー外なので変更しない。
+ */
+export const resetDiagramSettings = () => {
+  settings.diagramTheme = DEFAULT_SETTINGS.diagramTheme;
+  settings.fontSize = DEFAULT_SETTINGS.fontSize;
+  settings.curve = DEFAULT_SETTINGS.curve;
+  settings.look = DEFAULT_SETTINGS.look;
+  settings.nodeSpacing = DEFAULT_SETTINGS.nodeSpacing;
+  settings.rankSpacing = DEFAULT_SETTINGS.rankSpacing;
+  settings.diagramPadding = DEFAULT_SETTINGS.diagramPadding;
+  settings.fontFamily = DEFAULT_SETTINGS.fontFamily;
+};
 
 /** 図のテーマが暗色系か（Mermaid は dark のみ暗色、他は明色）。 */
 export const isDarkDiagramTheme = (): boolean =>

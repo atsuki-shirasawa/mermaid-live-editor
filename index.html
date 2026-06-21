@@ -68,6 +68,15 @@
         <h1 class="wordmark">Mermaid<span>Editor</span></h1>
       </div>
       <div class="actions">
+        <a
+          href="https://github.com/atsuki-shirasawa/mermaid-live-editor"
+          class="icon-btn"
+          target="_blank"
+          rel="noopener noreferrer"
+          data-icon="github"
+          aria-label="GitHub リポジトリを開く"
+          title="GitHub"
+        ></a>
         <button
           id="btn-theme"
           type="button"
@@ -231,6 +240,77 @@
           <option value="step">段差</option>
           <option value="natural">なめらか</option>
         </select>
+      </div>
+
+      <div class="field">
+        <label for="set-look">描画スタイル</label>
+        <select id="set-look">
+          <option value="classic">標準</option>
+          <option value="handDrawn">手書き風</option>
+          <option value="neo">ネオ</option>
+        </select>
+      </div>
+
+      <details class="advanced">
+        <summary>詳細設定</summary>
+
+        <div class="field">
+          <label for="set-node-spacing">
+            ノード間隔
+            <span id="node-spacing-value" class="field-value"></span>
+          </label>
+          <input
+            id="set-node-spacing"
+            type="range"
+            min="10"
+            max="100"
+            step="5"
+          />
+        </div>
+
+        <div class="field">
+          <label for="set-rank-spacing">
+            ランク間隔
+            <span id="rank-spacing-value" class="field-value"></span>
+          </label>
+          <input
+            id="set-rank-spacing"
+            type="range"
+            min="10"
+            max="100"
+            step="5"
+          />
+        </div>
+
+        <div class="field">
+          <label for="set-diagram-padding">
+            図の余白
+            <span id="diagram-padding-value" class="field-value"></span>
+          </label>
+          <input
+            id="set-diagram-padding"
+            type="range"
+            min="0"
+            max="40"
+            step="2"
+          />
+        </div>
+
+        <div class="field">
+          <label for="set-font">図のフォント</label>
+          <select id="set-font">
+            <option value="default">標準</option>
+            <option value="sans">本文</option>
+            <option value="mono">コード</option>
+          </select>
+        </div>
+      </details>
+
+      <div class="drawer-foot">
+        <button id="set-reset" type="button" class="btn btn-ghost">
+          <span class="btn-icon" data-icon="rotate-ccw"></span>
+          デフォルトに戻す
+        </button>
       </div>
     </aside>
 

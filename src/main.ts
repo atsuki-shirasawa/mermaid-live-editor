@@ -17,6 +17,15 @@ import {
   samplesToggle,
   setCurve,
   setFontSize,
+  setLook,
+  setNodeSpacing,
+  nodeSpacingValue,
+  setRankSpacing,
+  rankSpacingValue,
+  setDiagramPadding,
+  diagramPaddingValue,
+  setFont,
+  setReset,
   fontSizeValue,
   setTheme,
   settingsClose,
@@ -33,8 +42,8 @@ import { createFocusTrap } from "./focus-trap";
 import { iconSvg, renderIcons } from "./icons";
 import { applyMermaidConfig, render } from "./render";
 import { SAMPLES } from "./samples";
-import { saveSettings, settings } from "./settings";
-import type { Curve, ThemeName } from "./types";
+import { resetDiagramSettings, saveSettings, settings } from "./settings";
+import type { Curve, FontChoice, Look, ThemeName } from "./types";
 import { debounce, toast } from "./utils";
 import { initView } from "./view";
 
@@ -77,6 +86,14 @@ const syncSettingsUI = () => {
   setFontSize.value = String(settings.fontSize);
   fontSizeValue.textContent = `${settings.fontSize}px`;
   setCurve.value = settings.curve;
+  setLook.value = settings.look;
+  setNodeSpacing.value = String(settings.nodeSpacing);
+  nodeSpacingValue.textContent = String(settings.nodeSpacing);
+  setRankSpacing.value = String(settings.rankSpacing);
+  rankSpacingValue.textContent = String(settings.rankSpacing);
+  setDiagramPadding.value = String(settings.diagramPadding);
+  diagramPaddingValue.textContent = String(settings.diagramPadding);
+  setFont.value = settings.fontFamily;
 };
 
 /** 図に関わる設定変更後の共通処理：保存 → Mermaid 再設定 → 再描画。 */
@@ -104,6 +121,35 @@ const initSettings = () => {
   setCurve.addEventListener("change", () => {
     settings.curve = setCurve.value as Curve;
     onDiagramSettingsChange();
+  });
+  setLook.addEventListener("change", () => {
+    settings.look = setLook.value as Look;
+    onDiagramSettingsChange();
+  });
+  setNodeSpacing.addEventListener("input", () => {
+    settings.nodeSpacing = Number(setNodeSpacing.value);
+    nodeSpacingValue.textContent = setNodeSpacing.value;
+    onDiagramSettingsChange();
+  });
+  setRankSpacing.addEventListener("input", () => {
+    settings.rankSpacing = Number(setRankSpacing.value);
+    rankSpacingValue.textContent = setRankSpacing.value;
+    onDiagramSettingsChange();
+  });
+  setDiagramPadding.addEventListener("input", () => {
+    settings.diagramPadding = Number(setDiagramPadding.value);
+    diagramPaddingValue.textContent = setDiagramPadding.value;
+    onDiagramSettingsChange();
+  });
+  setFont.addEventListener("change", () => {
+    settings.fontFamily = setFont.value as FontChoice;
+    onDiagramSettingsChange();
+  });
+  setReset.addEventListener("click", () => {
+    resetDiagramSettings();
+    syncSettingsUI();
+    onDiagramSettingsChange();
+    toast("設定をデフォルトに戻しました");
   });
 };
 
