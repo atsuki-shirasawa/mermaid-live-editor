@@ -9,6 +9,12 @@ export type ThemeName = "default" | "dark" | "forest" | "neutral";
 /** フローチャートのエッジ曲線。 */
 export type Curve = "basis" | "linear" | "step" | "natural";
 
+/** 図の描画スタイル。 */
+export type Look = "classic" | "handDrawn" | "neo";
+
+/** 図のフォント（CSS 変数の3層構成に対応）。 */
+export type FontChoice = "default" | "sans" | "mono";
+
 /** 画像出力時の背景。 */
 export type Background = "auto" | "white" | "dark" | "transparent";
 
@@ -20,6 +26,11 @@ export interface Settings {
   diagramTheme: ThemeName;
   fontSize: number;
   curve: Curve;
+  look: Look;
+  nodeSpacing: number;
+  rankSpacing: number;
+  diagramPadding: number;
+  fontFamily: FontChoice;
   exportFormat: ExportFormat;
   exportBackground: Background;
   exportPadding: number;

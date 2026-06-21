@@ -912,6 +912,65 @@ body {
   cursor: pointer;
 }
 
+/* ---- 詳細設定（折りたたみ） ---- */
+.advanced {
+  margin-top: 0.5rem;
+  padding-top: 1.2rem;
+  border-top: 1px solid var(--border);
+}
+
+.advanced > summary {
+  font: var(--eyebrow);
+  letter-spacing: var(--eyebrow-tracking);
+  text-transform: uppercase;
+  color: var(--faint);
+  cursor: pointer;
+  list-style: none;
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  user-select: none;
+  transition: color 0.15s ease;
+}
+
+.advanced > summary:hover {
+  color: var(--text);
+}
+
+.advanced > summary::-webkit-details-marker {
+  display: none;
+}
+
+/* 開閉を示すシェブロン（▸ → ▾） */
+.advanced > summary::before {
+  content: "";
+  width: 0.42rem;
+  height: 0.42rem;
+  border-right: 1.5px solid currentColor;
+  border-bottom: 1.5px solid currentColor;
+  transform: rotate(-45deg);
+  transition: transform 0.18s ease;
+}
+
+.advanced[open] > summary::before {
+  transform: rotate(45deg);
+}
+
+.advanced[open] > summary {
+  margin-bottom: 1.3rem;
+}
+
+.drawer-foot {
+  margin-top: 1.6rem;
+  padding-top: 1.2rem;
+  border-top: 1px solid var(--border);
+}
+
+.drawer-foot .btn {
+  width: 100%;
+  justify-content: center;
+}
+
 /* ---- 出力モーダル ---- */
 .modal {
   position: fixed;

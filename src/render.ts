@@ -10,7 +10,18 @@ import {
 import { getCode } from "./editor";
 import { setExportEnabled } from "./export";
 import { isDarkDiagramTheme, settings } from "./settings";
+import type { FontChoice } from "./types";
 import { refreshView } from "./view";
+
+/** 図のフォント設定を CSS 変数から解決する（default は Mermaid 既定に任せる）。 */
+const resolveDiagramFont = (choice: FontChoice): string | undefined => {
+  if (choice === "default") return undefined;
+  const name = choice === "mono" ? "--font-mono" : "--font-sans";
+  const value = getComputedStyle(document.documentElement)
+    .getPropertyValue(name)
+    .trim();
+  return value || undefined;
+};
 
 const setError = (message: string | null) => {
   if (message) {
@@ -27,15 +38,27 @@ export const applyMermaidConfig = () => {
   document.documentElement.dataset.diagram = isDarkDiagramTheme()
     ? "dark"
     : "light";
-  mermaid.initialize({
+  const config: Parameters<typeof mermaid.initialize>[0] = {
     startOnLoad: false,
     theme: settings.diagramTheme,
+    look: settings.look,
     securityLevel: "loose",
     // foreignObject を避けて canvas 変換できるようにする（PNG/コピー用）。
     htmlLabels: false,
     fontSize: settings.fontSize,
-    flowchart: { htmlLabels: false, curve: settings.curve },
-  });
+    flowchart: {
+      htmlLabels: false,
+      curve: settings.curve,
+      nodeSpacing: settings.nodeSpacing,
+      rankSpacing: settings.rankSpacing,
+      diagramPadding: settings.diagramPadding,
+    },
+  };
+  // initialize は毎回まっさらな設定から再構築されるため、
+  // default のときは未設定にして Mermaid 既定フォントに戻す。
+  const font = resolveDiagramFont(settings.fontFamily);
+  if (font) config.fontFamily = font;
+  mermaid.initialize(config);
 };
 
 // 描画は非同期。最新の要求だけを反映するための連番。
